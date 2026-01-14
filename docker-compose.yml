@@ -28,7 +28,24 @@ services:
       user_db:
         condition: service_started
     restart: on-failure
-        
+  
+  service_log:
+    container_name: service_log
+    build:
+      context: ./service_log
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      DB_HOST: log_db
+      DB_NAME: log_db
+      DB_USER: user
+      DB_PASSWORD: password
+    depends_on:
+      log_db:
+        condition: service_started
+    restart: on-failure
+          
   user_db:
     image: postgres
     container_name: user_db
