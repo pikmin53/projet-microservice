@@ -4,3 +4,4 @@ typing
 jwt
 pwdlib
 pydantic
+uvicorn[standard]

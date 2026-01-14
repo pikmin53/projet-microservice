@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # The next command will be surcharged in docker-compose, but will be used in prod
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "api/main:app", "--host", "0.0.0.0", "--port", "8000"]
