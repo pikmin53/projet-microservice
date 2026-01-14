@@ -1,0 +1,6 @@
+fastapi
+datetime
+typing
+jwt
+pwdlib
+pydantic

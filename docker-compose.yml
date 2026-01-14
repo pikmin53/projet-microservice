@@ -1,0 +1,52 @@
+services:
+
+  api:
+    container_name: api_gateway
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      service_auth:
+        condition: service_started
+    restart: on-failure
+
+  service_auth:
+    container_name: service_auth
+    build:
+      context: ./service_authentification
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_USER_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      db:
+        condition: service_started
+    restart: on-failure
+        
+  db:
+    image: postgres:15
+    container_name: protgres_dbs
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER_DB=${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5433:5433"
+    restart: on-failure
+
+
+volumes:
+  pgdata:
+
+
+#- DATABASE_LOG_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_LOG}
+#- DATABASE_PM1_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_PM1}
