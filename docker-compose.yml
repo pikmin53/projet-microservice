@@ -6,7 +6,7 @@ services:
       context: ./api
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "${PORT_API}:8000"
     environment:
       - PYTHONUNBUFFERED=1
     depends_on:
@@ -20,9 +20,9 @@ services:
       context: ./service_authentification
       dockerfile: Dockerfile
     ports:
-      - "8001:8001"
+      - "${PORT_AUTH}:8001"
     environment:
-      - DATABASE_USER_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_BD_USER}
+      - DATABASE_USER_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${PORT_BDD}/${POSTGRES_BD_USER}
       - PYTHONUNBUFFERED=1
     depends_on:
       user_db:
@@ -68,7 +68,7 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - "${PORT_ADMINER}:8080"
 
 
 #- DATABASE_LOG_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_LOG}
