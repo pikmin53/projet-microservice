@@ -70,6 +70,18 @@ services:
     ports:
       - "${PORT_ADMINER}:8080"
 
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        # URL de l'API pour le build
+        VITE_API_URL: http://api:8000
+    container_name: frontend
+    ports:
+      - "${PORT_FRONT}:80"
+    restart: unless-stopped
+
 
 #- DATABASE_LOG_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_LOG}
 #- DATABASE_PM1_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_PM1}
