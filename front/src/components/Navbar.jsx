@@ -7,6 +7,7 @@ export default function Navbar() {
                 <li><Link to="/login">Connexion</Link></li>
                 <li><Link to="/signup">Inscription</Link></li>
                 <li><Link to="/dashboard">Dashboard</Link></li>
+                <li><Link to="/contacts">Contacts</Link></li>
             </ul>
         </nav>
     )
