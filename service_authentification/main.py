@@ -18,10 +18,7 @@ load_dotenv()
 #security 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-n = os.getenv("TOKEN_EXPIRE_MINUTES")
-print(n)
-print("hello")
-TOKEN_EXPIRE_MINUTES = int(n)
+TOKEN_EXPIRE_MINUTES = int(os.getenv("TOKEN_EXPIRE_MINUTES"))
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
