@@ -1,11 +1,10 @@
 fastapi
 uvicorn[standard]
-datetime
-typing
-jwt
+pyjwt
 pwdlib
 pydantic
-pwdlib[bcrypt]
-pwdlib[argon2]
 bcrypt
 python-multipart
+passlib[Argon2]
+sqlalchemy
+psycopg2-binary
