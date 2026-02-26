@@ -1,4 +1,4 @@
-import { useState } from 'react'
+  import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
@@ -6,13 +6,15 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const BASE = import.meta.env.VITE_API_URL;
   
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
 
     try {
-      const response = await fetch('http://api:8000/login', {
+        const response = await fetch(`${BASE}/auth/login`, {
+
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
