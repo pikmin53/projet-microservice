@@ -1,7 +1,7 @@
 services:
 
   api:
-    container_name: api_gateway
+    container_name: api
     build:
       context: ./api
       dockerfile: Dockerfile
@@ -13,6 +13,8 @@ services:
       service_auth:
         condition: service_started
     restart: on-failure
+    networks:
+      - backend
 
   service_auth:
     container_name: service_auth
@@ -75,12 +77,17 @@ services:
       context: ./front
       dockerfile: Dockerfile
       args:
-        # URL de l'API pour le build
-        VITE_API_URL: http://api:8000
+        VITE_API_URL: ${VITE_API_URL}
     container_name: frontend
     ports:
       - "${PORT_FRONT}:80"
     restart: unless-stopped
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
 
 
 #- DATABASE_LOG_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_LOG}
