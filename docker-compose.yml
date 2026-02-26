@@ -22,8 +22,13 @@ services:
     ports:
       - "${PORT_AUTH}:8001"
     environment:
-      - DATABASE_USER_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${PORT_BDD}/${POSTGRES_BD_USER}
+      - DATABASE_USER_URL
+      - SECRET_KEY
+      - ALGORITHM
+      - TOKEN_EXPIRE_MINUTES
       - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
     depends_on:
       user_db:
         condition: service_started
