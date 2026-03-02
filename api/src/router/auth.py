@@ -10,3 +10,7 @@ async def login():
 @router.post("/signup")
 async def register():
     return {"message": "Registration successful"}
+
+@router.post("/logout")
+async def logout():    
+    return {"message": "Logout successful"}
