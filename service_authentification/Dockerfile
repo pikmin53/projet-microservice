@@ -14,4 +14,4 @@ COPY . .
 
 # The next command will be surcharged in docker-compose, but will be used in prod
 
-CMD ["uvicorn", "login:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
