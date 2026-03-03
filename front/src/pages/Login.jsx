@@ -6,21 +6,27 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const BASE = import.meta.env.VITE_API_URL;
+  const VITE_API_AUTH = import.meta.env.VITE_API_AUTH_URL;
+
   
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
 
     try {
-        const response = await fetch(`${BASE}/auth/login`, {
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
+
+      const response = await fetch(`${VITE_API_AUTH}/token`, {
 
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({ email, password }),
+        body: formData,
       })
+      console.log("Réponse du serveur:", response)
 
       const data = await response.json()
       localStorage.setItem("token", data.access_token)
