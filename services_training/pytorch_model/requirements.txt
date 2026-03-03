@@ -1,10 +1,10 @@
 fastapi
 uvicorn[standard]
-pyjwt
-pwdlib
 pydantic
-bcrypt
-python-multipart
-passlib[Argon2]
 sqlalchemy
-psycopg2-binary
+torch.device
+torch.nn
+torch.optim
+torchvision.datasets.CIRFAR100
+torchvision.transforms
+psutil
