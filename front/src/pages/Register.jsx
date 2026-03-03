@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-export default function SignUp() {
+export default function Register() {
 
   const [name, setName] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -10,23 +10,23 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const BASE = import.meta.env.VITE_API_URL;
+  const VITE_API_AUTH = import.meta.env.VITE_API_AUTH_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
 
     try {
-      const response = await fetch(`${BASE}/auth/signup`, {
+      const response = await fetch(`${VITE_API_AUTH}/registerUser`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, firstName, email, password }),
+        body: JSON.stringify({ name, firstName, email, statut: "user", password }),
       })
 
       if (response.ok) {
-        navigate('/login')
+        navigate('/dashboard')
       } else {
         setError('Erreur lors de l\'inscription')
       }

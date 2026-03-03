@@ -12,6 +12,8 @@ from passlib.context import CryptContext
 import jwt
 from datetime import datetime, timedelta
 
+from fastapi.middleware.cors import CORSMiddleware
+
 
 load_dotenv()
 
@@ -35,7 +37,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    firstname = Column(String, nullable=False)
+    firstName = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     statut = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
@@ -48,7 +50,7 @@ Base.metadata.create_all(engine)
 # API MODELS
 class UserCreate(BaseModel):
     name: str
-    firstname: str
+    firstName: str
     email: str
     statut: str
     password: str
@@ -56,7 +58,7 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     name: str
-    firstname: str
+    firstName: str
     email: str
     statut: str
     is_active: bool
@@ -139,9 +141,23 @@ def get_current_active_user(current_user: User = Depends(get_current_user)):
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 #Auth endpoints
-@app.post("/creationCompte", response_model=UserResponse)
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+# création de compte 
+@app.post("/registerUser", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(status_code=400,
@@ -149,9 +165,9 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     hashed_password = get_password_hash(user.password)
     new_user = User(
         name=user.name,
-        firstname=user.firstname,
+        firstName=user.firstName,
         email=user.email,
-        statut=user.statut,
+        statut="user", #user ou admin
         hashed_password=hashed_password
     )
     db.add(new_user)
@@ -159,6 +175,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+#connexion
 @app.post("/token", response_model=Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
@@ -175,15 +192,13 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
 
-
+# récupérer le profil de l'utilisateur connecté
 @app.get("/profil", response_model=UserResponse)
 def get_profil(current_user: User = Depends(get_current_active_user)):
     return current_user
 
+# Vérifier la validité du token et retourner les informations de l'utilisateur
 @app.get("/verifyToken")
 def verify_token_endpoint(current_user:User = Depends(get_current_active_user)):
     return {
@@ -191,26 +206,27 @@ def verify_token_endpoint(current_user:User = Depends(get_current_active_user)):
         "user" : {
             "id" : current_user.id,
             "name" : current_user.name,
-            "firstname" : current_user.firstname,
+            "firstName" : current_user.firstName,
             "email" : current_user.email,
             "statut" : current_user.statut
         }
     }
 
-
+# liste des users
 @app.get("/users/", response_model=List[UserResponse])
 def list_users(current_user:User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     users = db.query(User).all()
     return users
 
-
-@app.get("/ususers/{user_id}", response_model=UserResponse)
+# récupérer un user par id
+@app.get("/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: int,current_user:User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return user
 
+# créer un user, depuis un compte d'un autre user connecté
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, current_user:User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == user.email).first():
@@ -219,9 +235,9 @@ def create_user(user: UserCreate, current_user:User = Depends(get_current_active
     hashed_password = get_password_hash(user.password)
     new_user = User(
         name=user.name,
-        firstname=user.firstname,
+        firstName=user.firstName,
         email=user.email,
-        statut=user.statut,
+        statut="user",
         hashed_password=hashed_password
     )
     db.add(new_user)
@@ -230,6 +246,7 @@ def create_user(user: UserCreate, current_user:User = Depends(get_current_active
     return new_user
 
 
+# mettre à jour un user, depuis un compte d'un autre user connecté
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserCreate, current_user:User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.id == user_id).first()
@@ -240,7 +257,7 @@ def update_user(user_id: int, user: UserCreate, current_user:User = Depends(get_
         raise HTTPException(status_code=400, detail="Email déjà utilisé")
     
     db_user.name = user.name
-    db_user.firstname = user.firstname
+    db_user.firstName = user.firstName
     db_user.email = user.email
     db_user.statut = user.statut
 
@@ -248,7 +265,7 @@ def update_user(user_id: int, user: UserCreate, current_user:User = Depends(get_
     db.refresh(db_user)
     return db_user
 
-
+# supprimer un user
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int, current_user:User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.id == user_id).first()
