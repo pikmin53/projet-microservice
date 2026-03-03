@@ -1,6 +1,8 @@
+import models.metrics
 from fastapi import FastAPI
 
 app = FastAPI()
+
 
 @app.get("/")
 async def root():

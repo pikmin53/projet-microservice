@@ -1,4 +1,71 @@
 services:
+  user_db:
+    image: postgres
+    container_name: user_db
+    restart: always
+    # set shared memory limit when using docker compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+
+  log_db:
+    image: postgres
+    container_name: log_db
+    restart: always
+    # set shared memory limit when using docker compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_DB: log_db
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+
+  tensorflow_db:
+    image: postgres
+    container_name: tensorflow_db
+    restart: always
+    # set shared memory limit when using docker compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_DB: tensorflow_db
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+
+  pytorch_db:
+    image: postgres
+    container_name: pytorch_db
+    restart: always
+    # set shared memory limit when using docker compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_DB: pytorch_db
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
 
   api:
     container_name: api_gateway
@@ -33,40 +100,43 @@ services:
       user_db:
         condition: service_started
     restart: on-failure
-        
-  user_db:
-    image: postgres
-    container_name: user_db
-    restart: always
-    # set shared memory limit when using docker compose
-    shm_size: 128mb
-    # or set shared memory limit when deploy via swarm stack
-    #volumes:
-    #  - type: tmpfs
-    #    target: /dev/shm
-    #    tmpfs:
-    #      size: 134217728 # 128*2^20 bytes = 128Mb
-    environment:
-      POSTGRES_DB: user_db
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: user
 
-  log_db:
-    image: postgres
-    container_name: log_db
-    restart: always
-    # set shared memory limit when using docker compose
-    shm_size: 128mb
-    # or set shared memory limit when deploy via swarm stack
-    #volumes:
-    #  - type: tmpfs
-    #    target: /dev/shm
-    #    tmpfs:
-    #      size: 134217728 # 128*2^20 bytes = 128Mb
+
+  service_tensorflow:
+    container_name: service_tensorflow
+    build:
+      context: ./services_training/tensorflow_model
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT_TENSORFLOW}:8003"
     environment:
-      POSTGRES_DB: log_db
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: user
+      - DATABASE_TENSORFLOW_URL
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      tensorflow_db:
+        condition: service_started
+    restart: on-failure
+
+
+  service_pytorch:
+    container_name: service_pytorch
+    build:
+      context: ./services_training/pytorch_model
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT_PYTORCH}:8002"
+    environment:
+      - DATABASE_PYTORCH_URL
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      pytorch_db:
+        condition: service_started
+    restart: on-failure
+        
 
 
   adminer:
