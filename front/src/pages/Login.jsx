@@ -1,12 +1,18 @@
-  import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+
 
 export default function Login() {
+  const location = useLocation()
+  const message = location.state?.error
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
   const VITE_API_AUTH = import.meta.env.VITE_API_AUTH_URL;
+  console.log("URL d'authentification appelée :", `${VITE_API_AUTH}/token`)
 
   
   const handleSubmit = async (e) => {
@@ -44,6 +50,7 @@ export default function Login() {
   return (
     <div className="container">
       <h2>Connexion</h2>
+      {message && <p className="error" style={{color:"red"}}>{message}</p>}
       <form onSubmit={handleSubmit}>
         <input 
           type="email"
