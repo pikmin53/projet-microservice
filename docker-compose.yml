@@ -1,4 +1,40 @@
 services:
+
+  api:
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT_API}:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_AUTH_URL
+    depends_on:
+      service_auth:
+        condition: service_started
+    restart: on-failure
+
+  service_auth:
+    container_name: service_auth
+    build:
+      context: ./service_authentification
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT_AUTH}:8001"
+    environment:
+      - DATABASE_USER_URL
+      - SECRET_KEY
+      - ALGORITHM
+      - TOKEN_EXPIRE_MINUTES
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      user_db:
+        condition: service_started
+    restart: on-failure
+        
   user_db:
     image: postgres
     container_name: user_db
@@ -66,40 +102,6 @@ services:
       POSTGRES_DB: pytorch_db
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user
-
-  api:
-    container_name: api_gateway
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    ports:
-      - "${PORT_API}:8000"
-    environment:
-      - PYTHONUNBUFFERED=1
-    depends_on:
-      service_auth:
-        condition: service_started
-    restart: on-failure
-
-  service_auth:
-    container_name: service_auth
-    build:
-      context: ./service_authentification
-      dockerfile: Dockerfile
-    ports:
-      - "${PORT_AUTH}:8001"
-    environment:
-      - DATABASE_USER_URL
-      - SECRET_KEY
-      - ALGORITHM
-      - TOKEN_EXPIRE_MINUTES
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
-    depends_on:
-      user_db:
-        condition: service_started
-    restart: on-failure
 
 
   service_tensorflow:
