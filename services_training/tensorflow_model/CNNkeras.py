@@ -9,7 +9,6 @@ from tensorflow.keras import Model, Sequential
 from tensorflow.keras.datasets import cifar100
 import time
 import psutil
-from models.metrics import MetricsTensorflowCreate, add_metrics
 
 # ========================
 # Custom callback
@@ -33,13 +32,7 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
             
             # RAM totale utilisée sur la machine
             system_ram = psutil.virtual_memory().percent
-            data = MetricsTensorflowCreate(
-                cpu=cpu_usage,
-                ram=ram_usage,
-                accuracy=logs.get('accuracy', 0),
-                duration=str(current_time - self.begin_time),
-                time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
-            )
+            
             
             self.last_print_time = current_time
 

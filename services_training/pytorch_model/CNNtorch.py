@@ -6,7 +6,6 @@ import torchvision.transforms as transforms
 import time
 import psutil
 import os
-from models.metrics import MetricsPytorchCreate, add_metrics
 
 def train_model():
     device = torch.device("cpu")
@@ -104,13 +103,6 @@ def train_model():
                 
                 #ram_process = process.memory_info().rss / 1024**2
                 ram_system = psutil.virtual_memory().percent
-                data = MetricsPytorchCreate(
-                    cpu=cpu_normalized,
-                    ram=ram_system,
-                    accuracy=100 * correct / total,
-                    duration=str(current_time - begin_time),
-                    time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
-                )
                 
                 last_time = current_time
 
