@@ -9,10 +9,24 @@ from tensorflow.keras import Model, Sequential
 from tensorflow.keras.datasets import cifar100
 import time
 import psutil
+from models.metrics import MetricsTensorflowCreate, add_metrics
+from confluent_kafka import Producer
+import json
 
-# ========================
-# Custom callback
-# ========================
+
+
+producer_config = {
+	"bootstrap.servers" : "kafka:9092"    
+}
+
+producer = Producer(producer_config)
+def delivery_report(err,msg):
+	if err : 
+		print(f"Erreur de reception du message : {err}")
+	else :
+		print(f"Message envoyé : {msg.value().decode('utf-8')}")
+
+
 class LiveMetricsCallback(tf.keras.callbacks.Callback):
     
     def on_train_begin(self, logs=None):
@@ -30,10 +44,17 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
             # RAM utilisée par le process Python (en MB)
             ram_usage = self.process.memory_info().rss / 1024**2
             
-            # RAM totale utilisée sur la machine
-            system_ram = psutil.virtual_memory().percent
-            
-            
+            metrics = {
+                "cpu" : cpu_usage,
+                "ram" : ram_usage,
+                "accuracy" : logs.get("accuracy", 0),
+                "duration" : time.time() - self.begin_time,
+                "time" : time.time()
+            }
+            value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
+            producer.produce(topic="metrics_tensorflow",value=value,callback=delivery_report)
+            producer.flush() #force l'envoie de ce format de message dans le topic kafka
+        
             self.last_print_time = current_time
 
 
@@ -89,9 +110,7 @@ def train_model():
         metrics=['accuracy']
     )
 
-    # ========================
-    # Train with callback
-    # ========================
+
     model.fit(
         x_train,
         y_train,
