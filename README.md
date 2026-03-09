@@ -45,7 +45,7 @@ Tous les services sont conteneurisés avec Docker et orchestrés via Docker Comp
 
 Pour démarrer tous les services :
 
-```bash
+```
 docker compose up
 ```
 
@@ -56,7 +56,7 @@ Cela construira et démarrera tous les conteneurs nécessaires. L'application se
 
 Pour arrêter les services :
 
-```bash
+```
 docker compose down
 ```
 
