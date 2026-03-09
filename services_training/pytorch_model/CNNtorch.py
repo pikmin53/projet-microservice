@@ -1,12 +1,11 @@
-import torch.device as tdevice
+import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.datasets.CIRFAR100 as cifar100
+from torchvision.datasets import CIFAR100
 import torchvision.transforms as transforms
 import time
 import psutil
 import os
-
 def train_model():
     device = tdevice("cpu")
 
@@ -19,7 +18,7 @@ def train_model():
                             (0.5, 0.5, 0.5))
     ])
 
-    trainset = cifar100(
+    trainset = CIFAR100(
         root="./data",
         train=True,
         download=True,
