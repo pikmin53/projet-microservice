@@ -5,3 +5,4 @@ sqlalchemy
 psycopg2-binary
 tensorflow-cpu==2.13.1
 psutil==5.9.8
+confluent_kafka
