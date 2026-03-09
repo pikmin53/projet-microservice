@@ -2,9 +2,7 @@ fastapi
 uvicorn[standard]
 pydantic
 sqlalchemy
-torch.device
-torch.nn
-torch.optim
-torchvision.datasets.CIRFAR100
-torchvision.transforms
-psutil
+psycopg2-binary
+torch==2.2.2
+torchvision==0.17.2
+psutil==5.9.8
