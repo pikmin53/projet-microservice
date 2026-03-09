@@ -4,5 +4,6 @@ pydantic
 sqlalchemy
 psycopg2-binary
 torch==2.2.2
+numpy
 torchvision==0.17.2
 psutil==5.9.8
