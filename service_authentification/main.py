@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy import Boolean, create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-
+from log_service import log_event
 from pydantic import BaseModel
 from typing import List, Optional
 import os
@@ -13,7 +13,7 @@ import jwt
 from datetime import datetime, timedelta
 
 from fastapi.middleware.cors import CORSMiddleware
-
+import logging
 
 load_dotenv()
 
@@ -180,9 +180,11 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
+        log_event("autentification-service", "WARNING", "Email ou mot de passe incorrect")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                             detail="Email ou mot de passe incorrect")
     if not user.is_active:
+        log_event("autentification-service", "WARNING", "Utilisateur inactif")
         raise HTTPException(status_code=404, 
                             detail="Utilisateur inactif")
     
@@ -190,6 +192,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
+    log_event("autentification-service", "INFO", "connexion reussie")
     return {"access_token": access_token, "token_type": "bearer"}
 
 

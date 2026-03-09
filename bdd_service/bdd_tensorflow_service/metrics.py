@@ -1,15 +1,15 @@
 from fastapi import HTTPException, Depends
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, Float, DateTime, Interval
+from sqlalchemy import Column, Integer, Float, DateTime, Time
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import os
+import datetime
 
 
-
-DATABASE_PYTORCH_URL = os.getenv("DATABASE_PYTORCH_URL")
-engine = create_engine(DATABASE_PYTORCH_URL)
+DATABASE_API_URL = os.getenv("DATABASE_API_URL")
+engine = create_engine(DATABASE_API_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -24,34 +24,33 @@ def get_db():
         db.close()
 
 
-class MetricsPytorch(Base):
-    __tablename__ = "metricsPytorch"
+class MetricsTensorflow(Base):
+    __tablename__ = "metricsTensorflow"
 
     id = Column(Integer, primary_key=True, index=True)
     cpu = Column(Float, nullable=False)
     ram = Column(Float, nullable=False)
     accuracy = Column(Float, nullable=False)
-    duration = Column(Interval, nullable=False)
+    duration = Column(Time, nullable=False)
     time = Column(DateTime, nullable=False)
 
 
 Base.metadata.create_all(bind=engine)
 
-
 # API MODELS
-class MetricsPytorchCreate(BaseModel):
+class MetricsTensorflowCreate(BaseModel):
     cpu: float
     ram: float
     accuracy: float
-    duration: str
-    time: str
+    duration: datetime.time
+    time: datetime.datetime
 
 
-def add_metrics(metrics: MetricsPytorchCreate, db: Session = Depends(get_db)):
-    if db.query(MetricsPytorch).filter(MetricsPytorch.time == metrics.time).first():
+def add_metrics(metrics: MetricsTensorflowCreate, db: Session = Depends(get_db)):
+    if db.query(MetricsTensorflow).filter(MetricsTensorflow.time == metrics.time).first():
         raise HTTPException(status_code=400, detail="Metrics déjà enregistrées")
     
-    new_metrics = MetricsPytorch(
+    new_metrics = MetricsTensorflow(
         cpu=metrics.cpu,
         ram=metrics.ram,
         accuracy=metrics.accuracy,
