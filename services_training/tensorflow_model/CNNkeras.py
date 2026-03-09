@@ -40,7 +40,7 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
                 duration=str(current_time - self.begin_time),
                 time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
             )
-            add_metrics(data)
+            
             self.last_print_time = current_time
 
 
@@ -102,7 +102,7 @@ def train_model():
     model.fit(
         x_train,
         y_train,
-        epochs=50,
+        epochs=20,
         batch_size=64,
         callbacks=[LiveMetricsCallback()]
     )
