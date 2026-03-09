@@ -52,9 +52,9 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user
 
-  log_db:
+  api_db:
     image: postgres
-    container_name: log_db
+    container_name: api_db
     restart: always
     # set shared memory limit when using docker compose
     shm_size: 128mb
@@ -65,41 +65,7 @@ services:
     #    tmpfs:
     #      size: 134217728 # 128*2^20 bytes = 128Mb
     environment:
-      POSTGRES_DB: log_db
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: user
-
-  tensorflow_db:
-    image: postgres
-    container_name: tensorflow_db
-    restart: always
-    # set shared memory limit when using docker compose
-    shm_size: 128mb
-    # or set shared memory limit when deploy via swarm stack
-    #volumes:
-    #  - type: tmpfs
-    #    target: /dev/shm
-    #    tmpfs:
-    #      size: 134217728 # 128*2^20 bytes = 128Mb
-    environment:
-      POSTGRES_DB: tensorflow_db
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: user
-
-  pytorch_db:
-    image: postgres
-    container_name: pytorch_db
-    restart: always
-    # set shared memory limit when using docker compose
-    shm_size: 128mb
-    # or set shared memory limit when deploy via swarm stack
-    #volumes:
-    #  - type: tmpfs
-    #    target: /dev/shm
-    #    tmpfs:
-    #      size: 134217728 # 128*2^20 bytes = 128Mb
-    environment:
-      POSTGRES_DB: pytorch_db
+      POSTGRES_DB: api_db
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user
 
@@ -117,7 +83,7 @@ services:
     env_file:
       - .env
     depends_on:
-      tensorflow_db:
+      api_db:
         condition: service_started
     restart: on-failure
 
@@ -135,11 +101,29 @@ services:
     env_file:
       - .env
     depends_on:
-      pytorch_db:
+      api_db:
         condition: service_started
     restart: on-failure
         
-        
+  bdd_service:
+    container_name: bdd_service
+    build:
+      context: ./bdd_service
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT_SERVICE_BDD}:8004"
+    environment:
+      - DATABASE_USER_URL
+      - SECRET_KEY
+      - ALGORITHM
+      - TOKEN_EXPIRE_MINUTES
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      user_db:
+        condition: service_started
+    restart: on-failure  
 
 
   adminer:
