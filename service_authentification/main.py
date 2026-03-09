@@ -160,8 +160,10 @@ async def root():
 @app.post("/registerUser", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == user.email).first():
+        log_event("autentification-service", "WARNING", "Utilisateur deja cree")
         raise HTTPException(status_code=400,
                             detail="Email déjà utilisé")
+        
     hashed_password = get_password_hash(user.password)
     new_user = User(
         name=user.name,
@@ -173,6 +175,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    log_event("autentification-service", "INFO", "Nouvel utilisateur ajoute")
     return new_user
 
 #connexion
@@ -204,6 +207,7 @@ def get_profil(current_user: User = Depends(get_current_active_user)):
 # Vérifier la validité du token et retourner les informations de l'utilisateur
 @app.get("/verifyToken")
 def verify_token_endpoint(current_user:User = Depends(get_current_active_user)):
+    log_event("autentification-service", "INFO", "Verification du token de connection")
     return {
         "valid" : True,
         "user" : {

@@ -5,6 +5,7 @@ from torchvision.datasets import CIFAR100
 import torchvision.transforms as transforms
 import time
 import psutil
+from log_service import log_event
 from confluent_kafka import Producer
 import os
 import json
@@ -25,6 +26,7 @@ def delivery_report(err,msg):
 
 
 def train_model():
+    log_event("pytorch-model", "INFO", "Debut d'entrainement")
     device = torch.device("cpu") #selection du device (CPU) car pas de gpu sur machine
     transform = transforms.Compose([ #transformation des données d'entrée pour les rendre compatibles avec le modèle
         transforms.ToTensor(),
@@ -115,6 +117,7 @@ def train_model():
                     "time" : time.time()
                 }
                 value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
+                log_event("pytorch-service", "INFO", "Envoi de metrics")
                 producer.produce(topic="metrics_pytorch",value=value,callback=delivery_report)
                 producer.flush() #force l'envoie de ce format de message dans le topic kafka
                 print(f"Epoch {epoch+1}, Batch {i+1}, Loss: {running_loss/(i+1):.4f}, Accuracy: {100 * correct / total:.2f}%")
