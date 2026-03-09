@@ -71,7 +71,7 @@ def train_model():
     # =========================
     # Training Loop
     # =========================
-    epochs = 5
+    epochs = 20
 
     for epoch in range(epochs):
         model.train()
@@ -111,7 +111,7 @@ def train_model():
                     duration=str(current_time - begin_time),
                     time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
                 )
-                add_metrics(data)
+                
                 last_time = current_time
 
     print("Training finished.")
