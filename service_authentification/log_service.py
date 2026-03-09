@@ -19,5 +19,5 @@ def log_event(service: str, level: str, message: str):
         "message" : message,
         "time" : datetime.utcnow().isoformat()
     }
-    producer.produce(topic = "logs", value = log_data, callback = delivery_report)
+    producer.produce(topic = "logs", value = json.dumps(log_data).encode("utf-8"), callback = delivery_report)
     producer.flush()

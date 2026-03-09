@@ -8,7 +8,6 @@ import psutil
 from confluent_kafka import Producer
 import os
 import json
-from models.metrics import MetricsPytorchCreate, add_metrics
 
 
 producer_config = {

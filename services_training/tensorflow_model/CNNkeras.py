@@ -9,7 +9,6 @@ from tensorflow.keras import Model, Sequential
 from tensorflow.keras.datasets import cifar100
 import time
 import psutil
-from models.metrics import MetricsTensorflowCreate, add_metrics
 from confluent_kafka import Producer
 import json
 
