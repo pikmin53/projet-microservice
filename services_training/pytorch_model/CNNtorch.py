@@ -6,8 +6,10 @@ import torchvision.transforms as transforms
 import time
 import psutil
 import os
+from models.metrics import MetricsPytorchCreate, add_metrics
+
 def train_model():
-    device = tdevice("cpu")
+    device = torch.device("cpu")
 
     # =========================
     # Dataset CIFAR-100
@@ -64,6 +66,7 @@ def train_model():
     process = psutil.Process(os.getpid())
     cpu_count = psutil.cpu_count()
     last_time = time.time()
+    begin_time = last_time
 
     # =========================
     # Training Loop
@@ -99,24 +102,16 @@ def train_model():
                 cpu_raw = psutil.cpu_percent()
                 cpu_normalized = cpu_raw / cpu_count
                 
-                ram_process = process.memory_info().rss / 1024**2
+                #ram_process = process.memory_info().rss / 1024**2
                 ram_system = psutil.virtual_memory().percent
-                
-                print("\n==============================")
-                print("📊 Live Metrics (PyTorch)")
-                print(f"Epoch: {epoch+1}")
-                print(f"Loss: {running_loss / (i+1):.4f}")
-                print(f"Accuracy: {100 * correct / total:.2f}%")
-                print(f"CPU Usage (raw): {cpu_raw:.1f}%")
-                print(f"CPU Usage (normalized): {cpu_normalized:.1f}%")
-                print(f"Process RAM: {ram_process:.2f} MB")
-                print(f"System RAM Usage: {ram_system:.1f}%")
-                
-                if torch.cuda.is_available():
-                    print(f"GPU Memory Allocated: {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
-                
-                print("==============================")
-                
+                data = MetricsPytorchCreate(
+                    cpu=cpu_normalized,
+                    ram=ram_system,
+                    accuracy=100 * correct / total,
+                    duration=str(current_time - begin_time),
+                    time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
+                )
+                add_metrics(data)
                 last_time = current_time
 
     print("Training finished.")
