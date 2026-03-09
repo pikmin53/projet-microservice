@@ -9,7 +9,7 @@ from confluent_kafka import Producer
 import os
 import json
 from models.metrics import MetricsPytorchCreate, add_metrics
-
+from datetime import timedelta
 
 producer_config = {
 	"bootstrap.servers" : "kafka:9092"
@@ -108,12 +108,12 @@ def train_model():
                 cpu_normalized = cpu_raw / cpu_count #normalisation de l'utilisation du cpu en fonction du nombre de coeur du processeur
                 
                 ram_process = process.memory_info().rss / 1024**2
-                
+                duration= timedelta(seconds=current_time - begin_time)
                 metrics = {
                     "cpu" : cpu_normalized,
                     "ram" : ram_process,
                     "accuracy" : 100 * correct / total,
-                    "duration" : time.time() - begin_time,
+                    "duration" : str(duration),
                     "time" : time.time()
                 }
                 value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
