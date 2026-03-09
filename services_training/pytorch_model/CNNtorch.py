@@ -9,7 +9,8 @@ from log_service import log_event
 from confluent_kafka import Producer
 import os
 import json
-
+from models.metrics import MetricsPytorchCreate, add_metrics
+from datetime import timedelta
 
 producer_config = {
 	"bootstrap.servers" : "kafka:9092"
@@ -73,7 +74,8 @@ def train_model():
     optimizer = optim.Adam(model.parameters(), lr=0.001)#utilisation de l'optimiseur Adam pour mettre à jour les poids du modèle pendant l'entraînement, taux apprentissage=0.001
 
 
-    process = psutil.Process(os.getpid())#focus sur le processus actuel qui est celui du modèle pour ressortir les métrics
+    process = psutil.Process(os.getpid())#focus sur le processus actuel qui est celui du modèle pour ressortir les métric
+    cpu_raw = process.cpu_percent()
     cpu_count = psutil.cpu_count() #nb coeur processesseur
     last_time = time.time()
     begin_time = last_time
@@ -103,17 +105,17 @@ def train_model():
             
             current_time = time.time()
             if current_time - last_time >= 5:#retour des métrics souhaitez toutes les 5 secondes
-                process=psutil.Process(os.getpid())#focus sur le processus actuel qui est celui du modèle pour ressortir les métrics
+                
                 cpu_raw = process.cpu_percent()
                 cpu_normalized = cpu_raw / cpu_count #normalisation de l'utilisation du cpu en fonction du nombre de coeur du processeur
                 
                 ram_process = process.memory_info().rss / 1024**2
-                
+                duration= timedelta(seconds=current_time - begin_time)
                 metrics = {
                     "cpu" : cpu_normalized,
                     "ram" : ram_process,
                     "accuracy" : 100 * correct / total,
-                    "duration" : time.time() - begin_time,
+                    "duration" : str(duration),
                     "time" : time.time()
                 }
                 value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka

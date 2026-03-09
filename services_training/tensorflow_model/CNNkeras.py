@@ -12,7 +12,7 @@ import psutil
 from confluent_kafka import Producer
 from log_service import log_event
 import json
-
+from datetime import timedelta
 
 
 producer_config = {
@@ -43,12 +43,13 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
             cpu_usage = self.process.cpu_percent()/cpu_count
             # RAM utilisée par le process Python (en MB)
             ram_usage = self.process.memory_info().rss / 1024**2
-            
+            #calcul duration sous format datetime avec time.time et self.begin_time
+            duration = timedelta(seconds=time.time() - self.begin_time)
             metrics = {
                 "cpu" : cpu_usage,
                 "ram" : ram_usage,
                 "accuracy" : logs.get("accuracy", 0),
-                "duration" : time.time() - self.begin_time,
+                "duration" : str(duration),
                 "time" : time.time()
             }
             value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
