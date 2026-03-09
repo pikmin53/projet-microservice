@@ -34,7 +34,24 @@ services:
       user_db:
         condition: service_started
     restart: on-failure
-        
+  
+  service_log:
+    container_name: service_log
+    build:
+      context: ./service_log
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      DB_HOST: log_db
+      DB_NAME: log_db
+      DB_USER: user
+      DB_PASSWORD: password
+    depends_on:
+      log_db:
+        condition: service_started
+    restart: on-failure
+          
   user_db:
     image: postgres
     container_name: user_db
@@ -144,9 +161,31 @@ services:
       - "${PORT_FRONT}:80"
     restart: unless-stopped
 
+  kafka:
+    image : confluentinc/cp-kafka:7.8.3
+    container_name: kafka
+    ports:
+      - "${PORT_KAFKA}:9092"
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      CLUSTER_ID: "Qi0fGmQDTMuu9eKmM3ixnA"
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:${PORT_KAFKA}"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+    volumes:
+      - kafka_kafka:/var/lib/kafka/data
+
 networks:
   backend:
     driver: bridge
+
+volumes:
+  kafka_kafka:
 
 
 #- DATABASE_LOG_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_LOG}
