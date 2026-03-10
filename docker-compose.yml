@@ -79,12 +79,14 @@ services:
     ports:
       - "${PORT_TENSORFLOW}:8003"
     environment:
-      - DATABASE_TENSORFLOW_URL
+      - DATABASE_API_URL
       - PYTHONUNBUFFERED=1
     env_file:
       - .env
     depends_on:
       api_db:
+        condition: service_started
+      kafka:
         condition: service_started
     restart: on-failure
 
@@ -97,7 +99,7 @@ services:
     ports:
       - "${PORT_PYTORCH}:8002"
     environment:
-      - DATABASE_PYTORCH_URL
+      - DATABASE_API_URL
       - PYTHONUNBUFFERED=1
     env_file:
       - .env
@@ -116,15 +118,18 @@ services:
     ports:
       - "${PORT_SERVICE_BDD}:8004"
     environment:
-      - DATABASE_USER_URL
-      - SECRET_KEY
-      - ALGORITHM
-      - TOKEN_EXPIRE_MINUTES
+      - DATABASE_API_URL
       - PYTHONUNBUFFERED=1
     env_file:
       - .env
     depends_on:
-      user_db:
+      api_db:
+        condition: service_started
+      kafka:
+        condition: service_started
+      service_tensorflow:
+        condition: service_started
+      service_pytorch:
         condition: service_started
     restart: on-failure  
 
