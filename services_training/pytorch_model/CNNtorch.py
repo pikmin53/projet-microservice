@@ -8,9 +8,9 @@ import psutil
 from confluent_kafka import Producer
 import os
 import json
-from models.metrics import MetricsPytorchCreate, add_metrics
 from datetime import timedelta
 
+## Configuration du producteur Kafka pour envoyer les métrics d'entraînement au topic "metrics_pytorch"
 producer_config = {
 	"bootstrap.servers" : "kafka:9092"
      
@@ -23,6 +23,10 @@ def delivery_report(err,msg):
 	else :
 		print(f"Message envoyé : {msg.value().decode('utf-8')}")
 
+## Limitation des coeurs CPU
+CPU_CORES_LIMIT = 2
+torch.set_num_threads(CPU_CORES_LIMIT)
+torch.set_num_interop_threads(CPU_CORES_LIMIT)
 
 
 def train_model():
@@ -102,10 +106,10 @@ def train_model():
             correct += (predicted == labels).sum().item()
             
             current_time = time.time()
-            if current_time - last_time >= 5:#retour des métrics souhaitez toutes les 5 secondes
+            if current_time - last_time >= 4:#retour des métrics souhaitez toutes les 4 secondes
                 
                 cpu_raw = process.cpu_percent()
-                cpu_normalized = cpu_raw / cpu_count #normalisation de l'utilisation du cpu en fonction du nombre de coeur du processeur
+                cpu_normalized = cpu_raw / CPU_CORES_LIMIT #normalisation de l'utilisation du cpu en fonction du nombre de coeur du processeur
                 
                 ram_process = process.memory_info().rss / 1024**2
                 duration= timedelta(seconds=current_time - begin_time)

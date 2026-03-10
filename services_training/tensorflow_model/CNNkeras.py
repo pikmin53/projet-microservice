@@ -13,7 +13,7 @@ from confluent_kafka import Producer
 import json
 from datetime import timedelta
 
-
+## Configuration du producteur Kafka pour envoyer les métrics d'entraînement au topic "metrics_tensorflow"
 producer_config = {
 	"bootstrap.servers" : "kafka:9092"    
 }
@@ -24,6 +24,19 @@ def delivery_report(err,msg):
 		print(f"Erreur de reception du message : {err}")
 	else :
 		print(f"Message envoyé : {msg.value().decode('utf-8')}")
+
+## Limitation des coeurs CPU
+CPU_CORES_LIMIT = 2  # Nombre de cœurs à utiliser (ajuste selon tes besoins)
+
+# Limitation au niveau TensorFlow (inter = entre opérations, intra = dans une opération)
+tf.config.threading.set_inter_op_parallelism_threads(CPU_CORES_LIMIT)
+tf.config.threading.set_intra_op_parallelism_threads(CPU_CORES_LIMIT)
+
+# Limitation au niveau OS (affinity sur les cœurs physiques)
+process = psutil.Process(os.getpid())
+available_cores = list(range(psutil.cpu_count()))
+limited_cores = available_cores[:CPU_CORES_LIMIT]
+process.cpu_affinity(limited_cores)
 
 
 class LiveMetricsCallback(tf.keras.callbacks.Callback):
@@ -36,10 +49,10 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
     def on_batch_end(self, batch, logs=None):
         current_time = time.time()
         
-        # Print every 5 seconds
-        if current_time - self.last_print_time >= 5:
+        
+        if current_time - self.last_print_time >= 4: #retour métrics toutes les 4 secondes 
             cpu_count = psutil.cpu_count()
-            cpu_usage = self.process.cpu_percent()/cpu_count
+            cpu_usage = self.process.cpu_percent()/CPU_CORES_LIMIT
             # RAM utilisée par le process Python (en MB)
             ram_usage = self.process.memory_info().rss / 1024**2
             #calcul duration sous format datetime avec time.time et self.begin_time
@@ -54,12 +67,11 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
             value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
             producer.produce(topic="metrics_tensorflow",value=value,callback=delivery_report)
             producer.flush() #force l'envoie de ce format de message dans le topic kafka
-        
             self.last_print_time = current_time
 
 
 def train_model():
-    #download the dataset and split it into training and test sets
+    # Configuration du modèle CNN pour la classification d'images du dataset CIFAR-100
     image_size = (32, 32, 3)
     nb_classes = 100
 
@@ -70,11 +82,11 @@ def train_model():
     assert y_train.shape == (50000, 1)
     assert y_test.shape == (10000, 1)
 
-    # Normalize
+    # Normalisation
     x_train = x_train / 255.0
     x_test = x_test / 255.0
 
-    #data augmentation of cifar100 dataset because only 600 image per class and we have 100 classes, so we need to augment the data to increase the number of images per class and improve the performance of the model
+    #augmentation des images d'entraînement car 600 images par classe seulement
     data_augmentation = Sequential(
         [
             layers.Normalization(),
@@ -100,7 +112,7 @@ def train_model():
         
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
-        layers.Dense(nb_classes)  # 100 classes in CIFAR-100 dataset
+        layers.Dense(nb_classes)  # 100 classes
     ])
 
 

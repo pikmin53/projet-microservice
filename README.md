@@ -64,6 +64,9 @@ docker compose down
 - **PyTorch Model** : Modèle de réseau de neurones convolutionnel (CNN).
 - **TensorFlow Model** : Modèle CNN avec Keras.
 
+### Service Kafka 
+- **Description** : Automatise le transfert d'information en continu entre les différents services(log, training, front.)
+
 ## Licence
 
 Ce projet est sous licence MIT.
