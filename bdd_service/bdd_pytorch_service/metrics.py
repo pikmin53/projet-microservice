@@ -1,16 +1,13 @@
 import json
 import time
 import threading
-
-from fastapi import HTTPException, Depends
-from pydantic import BaseModel
-from sqlalchemy import Column, Integer, Float, DateTime, Time
+from sqlalchemy import Column, Integer, Float, DateTime, VARCHAR
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import os
-import datetime
 from confluent_kafka import Consumer
+from log_service import log_event
 
 
 DATABASE_API_URL = os.getenv("DATABASE_API_URL")
@@ -31,12 +28,12 @@ def get_db():
 
 class MetricsPytorch(Base):
     __tablename__ = "metricsPytorch"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     cpu = Column(Float, nullable=False)
     ram = Column(Float, nullable=False)
     accuracy = Column(Float, nullable=False)
-    duration = Column(Time, nullable=False)
+    duration = Column(VARCHAR(100), nullable=False)
     time = Column(DateTime, nullable=False)
 
 
@@ -51,18 +48,20 @@ def add_metrics(metrics: json):
         ram=metrics["ram"],
         accuracy=metrics["accuracy"],
         duration=metrics["duration"],
-        time=metrics["time"]
-    )
+        time=metrics["time"])
     db.add(new_metrics)
     db.commit()
     db.refresh(new_metrics)
+    total = db.query(MetricsPytorch).count()
+    print(f"Total lignes metricsPytorch : {total}")
+    log_event("BDD-service", "INFO", "metrics Pytorch ajoutees")
     return new_metrics
 
 
 def run_consumer():
     consumer_config = {
         "bootstrap.servers": "kafka:9092",
-        "group.id" : "metrics-tracker",
+        "group.id" : "pytorch-consumer",
         "auto.offset.reset":"earliest"
     }
     consumer = Consumer(consumer_config)
@@ -80,8 +79,8 @@ def run_consumer():
 
         value = msg.value().decode('utf-8')
         metrics = json.loads(value)
-        new_log = add_metrics(metrics)
-        print(f"Données reçues : {new_log}")
+        new_metrics = add_metrics(metrics)
+        print(f"Données reçues : {new_metrics}")
 
 
 # Démarrer le consumer dans un thread séparé

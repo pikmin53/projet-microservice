@@ -9,8 +9,7 @@ from log_service import log_event
 from confluent_kafka import Producer
 import os
 import json
-from models.metrics import MetricsPytorchCreate, add_metrics
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 producer_config = {
 	"bootstrap.servers" : "kafka:9092"
@@ -116,7 +115,7 @@ def train_model():
                     "ram" : ram_process,
                     "accuracy" : 100 * correct / total,
                     "duration" : str(duration),
-                    "time" : time.time()
+                    "time" : datetime.utcnow().isoformat()
                 }
                 value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
                 log_event("pytorch-service", "INFO", "Envoi de metrics")

@@ -12,7 +12,7 @@ import psutil
 from confluent_kafka import Producer
 from log_service import log_event
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 
 producer_config = {
@@ -50,7 +50,7 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
                 "ram" : ram_usage,
                 "accuracy" : logs.get("accuracy", 0),
                 "duration" : str(duration),
-                "time" : time.time()
+                "time" : datetime.utcnow().isoformat()
             }
             value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
             log_event("tensorflow-service", "INFO", "Envoi de metrics")

@@ -1,15 +1,12 @@
 import json
-import time
 import threading
 
-from fastapi import HTTPException, Depends
-from pydantic import BaseModel
+
 from sqlalchemy import Column, Integer, Float, DateTime, Interval, Text, VARCHAR
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import os
-import datetime
 from confluent_kafka import Consumer
 
 
@@ -63,7 +60,7 @@ def add_log(log : json):
 def run_consumer():
     consumer_config = {
         "bootstrap.servers": "kafka:9092",
-        "group.id" : "metrics-tracker",
+        "group.id" : "logs-consumer",
         "auto.offset.reset":"earliest"
     }
     consumer = Consumer(consumer_config)
