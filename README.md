@@ -72,8 +72,12 @@ docker compose down
 - **PyTorch Model** : Modèle de réseau de neurones convolutionnel (CNN).
 - **TensorFlow Model** : Modèle CNN avec Keras.
 
-### Service Kafka 
-- **Description** : Automatise le transfert d'information en continu entre les différents services(log, training, front.)
+### Utilisateurs par défault : 
+- userAdmin1 = UserCreate("Georgette", "Cy", "georgette.cy@coucou.com", "admin", "password")
+- userAdmin2 = UserCreate("Victor", "Tech", "victor.tech@coucou.com", "admin", "password")
+- user1 = UserCreate("Laura", "Carotte", "laura.carotte@coucou.com", "", "password")
+- user2 = UserCreate("George", "Cy", "george.cy@coucou.com", "", "password")
+- user3 = UserCreate("Prince", "Petit", "petit.prince@coucou.com", "", "password")
 
 ## Licence
 

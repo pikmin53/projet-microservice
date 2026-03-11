@@ -12,8 +12,9 @@ from tensorflow.keras.datasets import cifar100
 import time
 import psutil
 from confluent_kafka import Producer
+from log_service import log_event
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 ## Configuration du producteur Kafka pour envoyer les métrics d'entraînement au topic "metrics_tensorflow"
 producer_config = {
@@ -64,16 +65,18 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
                 "ram" : ram_usage,
                 "accuracy" : logs.get("accuracy", 0),
                 "vitesse_exec" : self.samples_processed / (current_time - self.begin_time),
-                "time" : time.time()
+                "time" : datetime.utcnow().isoformat()
             }
             value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
+            log_event("tensorflow-service", "INFO", "Envoi de metrics")
             producer.produce(topic="metrics_tensorflow",value=value,callback=delivery_report)
             producer.flush() #force l'envoie de ce format de message dans le topic kafka
             self.last_print_time = current_time
 
 
 def train_model():
-    # Configuration du modèle CNN pour la classification d'images du dataset CIFAR-100
+    log_event("pytorch-model", "INFO", "Debut d'entrainement")
+    #download the dataset and split it into training and test sets
     image_size = (32, 32, 3)
     nb_classes = 100
 

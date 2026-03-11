@@ -87,12 +87,14 @@ services:
       context: ./services_training/tensorflow_model
       dockerfile: Dockerfile
     environment:
-      - DATABASE_TENSORFLOW_URL
+      - DATABASE_API_URL
       - PYTHONUNBUFFERED=1
     env_file:
       - .env
     depends_on:
       api_db:
+        condition: service_started
+      kafka:
         condition: service_started
     restart: on-failure
     volumes:
@@ -107,7 +109,7 @@ services:
       context: ./services_training/pytorch_model
       dockerfile: Dockerfile
     environment:
-      - DATABASE_PYTORCH_URL
+      - DATABASE_API_URL
       - PYTHONUNBUFFERED=1
     env_file:
       - .env
@@ -129,15 +131,18 @@ services:
       dockerfile: Dockerfile
     
     environment:
-      - DATABASE_USER_URL
-      - SECRET_KEY
-      - ALGORITHM
-      - TOKEN_EXPIRE_MINUTES
+      - DATABASE_API_URL
       - PYTHONUNBUFFERED=1
     env_file:
       - .env
     depends_on:
-      user_db:
+      api_db:
+        condition: service_started
+      kafka:
+        condition: service_started
+      service_tensorflow:
+        condition: service_started
+      service_pytorch:
         condition: service_started
     restart: on-failure  
     networks:

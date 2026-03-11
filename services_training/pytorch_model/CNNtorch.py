@@ -5,10 +5,11 @@ from downloadcifar import cirfar
 import torchvision.transforms as transforms
 import time
 import psutil
+from log_service import log_event
 from confluent_kafka import Producer
 import os
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 ## Configuration du producteur Kafka pour envoyer les métrics d'entraînement au topic "metrics_pytorch"
 producer_config = {
@@ -30,6 +31,7 @@ torch.set_num_interop_threads(CPU_CORES_LIMIT)
 
 
 def train_model():
+    log_event("pytorch-model", "INFO", "Debut d'entrainement")
     device = torch.device("cpu") #selection du device (CPU) car pas de gpu sur machine
     transform = transforms.Compose([ #transformation des données d'entrée pour les rendre compatibles avec le modèle
         transforms.ToTensor(),
@@ -112,9 +114,10 @@ def train_model():
                     "ram" : ram_process,
                     "accuracy" : correct / total,
                     "vitesse_exec" : total / (current_time - begin_time),
-                    "time" : time.time()
+                    "time" : datetime.utcnow().isoformat()
                 }
                 value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
+                log_event("pytorch-service", "INFO", "Envoi de metrics")
                 producer.produce(topic="metrics_pytorch",value=value,callback=delivery_report)
                 producer.flush() #force l'envoie de ce format de message dans le topic kafka
                 print(f"Epoch {epoch+1}, Batch {i+1}, Loss: {running_loss/(i+1):.4f}, Accuracy: {correct/total:.4f}, vitesse_exec: {total / (current_time - begin_time):.2f} images/s")
