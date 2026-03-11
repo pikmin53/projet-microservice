@@ -280,12 +280,12 @@ userAdmin2 = UserCreate(firstName="Victor", name="Tech",  email="victor.tech@cou
 user1 = UserCreate(firstName="Laura", name="Carotte",  email="laura.carotte@coucou.com", statut="user", password="password")
 user2 = UserCreate(firstName="George", name="Cy",  email="george.cy@coucou.com", statut="user", password="password")
 user3 = UserCreate(firstName="Prince", name="Petit",  email="petit.prince@coucou.com", statut="user", password="password")
-db = SessionLocal()
-register_user(userAdmin1, db)
-register_user(userAdmin2, db)
-register_user(user1, db)
-register_user(user2, db)
-register_user(user3, db)
-db.close()
 
+db = SessionLocal()
+for user in [userAdmin1, userAdmin2, user1, user2, user3]:
+    try:
+        register_user(user, db)
+    except HTTPException:
+        pass  # user existe déjà, on ignore
+db.close()
 
