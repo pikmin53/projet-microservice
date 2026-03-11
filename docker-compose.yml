@@ -153,6 +153,10 @@ services:
     restart: always
     ports:
       - "${PORT_ADMINER}:8080"
+    networks:
+      - internal
+      - externe
+
 
   front:
     build:

@@ -33,7 +33,7 @@ class MetricsPytorch(Base):
     cpu = Column(Float, nullable=False)
     ram = Column(Float, nullable=False)
     accuracy = Column(Float, nullable=False)
-    duration = Column(VARCHAR(100), nullable=False)
+    vitesse_exec = Column(Float, nullable=False)
     time = Column(DateTime, nullable=False)
 
 
@@ -47,7 +47,7 @@ def add_metrics(metrics: json):
         cpu=metrics["cpu"],
         ram=metrics["ram"],
         accuracy=metrics["accuracy"],
-        duration=metrics["duration"],
+        vitesse_exec=metrics["vitesse_exec"],
         time=metrics["time"])
     db.add(new_metrics)
     db.commit()
