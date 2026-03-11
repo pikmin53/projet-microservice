@@ -7,10 +7,10 @@ consumer_config = {
 	"auto.offset.reset": "earliest"
 }
 
-def create_consumer():
+def create_consumer(topic):
 	consumer = Consumer(consumer_config)
-	consumer.subscribe(["metrics_pytorch"])
-	print("Ce champs est inscrit à metrics")
+	consumer.subscribe([topic])
+	print(f"Ce champs est inscrit à {topic}")
 	return consumer
 
 def consume_metrics(consumer):
