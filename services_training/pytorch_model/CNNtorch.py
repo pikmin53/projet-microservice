@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision.datasets import CIFAR100
+from downloadcifar import cirfar
 import torchvision.transforms as transforms
 import time
 import psutil
@@ -37,12 +37,7 @@ def train_model():
                             (0.5, 0.5, 0.5))
     ])
 
-    trainset = CIFAR100( #téléchargement du dataset CIFAR-100 pour l'entraînement
-        root="./data",
-        train=True,
-        download=True,
-        transform=transform
-    )
+    trainset = cirfar #chargment du dataset dl prédement quand il y avait de la connection
 
     trainloader = torch.utils.data.DataLoader( #création d'un DataLoader pour itérer sur le dataset d'entraînement
         trainset,
@@ -78,7 +73,6 @@ def train_model():
 
     process = psutil.Process(os.getpid())#focus sur le processus actuel qui est celui du modèle pour ressortir les métric
     cpu_raw = process.cpu_percent()
-    cpu_count = psutil.cpu_count() #nb coeur processesseur
     last_time = time.time()
     begin_time = last_time
     epochs = 20 #nb d'itération sur l'ensemble du dataset d'entraînement
@@ -93,7 +87,7 @@ def train_model():
         for i, (inputs, labels) in enumerate(trainloader): #itération sur les batches d'entraînement, inputs sont les images et labels sont les classes correspondantes
             inputs, labels = inputs.to(device), labels.to(device)
             
-            optimizer.zero_grad()
+            optimizer.zero_grad() #pas de calcul de gradient 
             outputs = model(inputs)
             loss = criterion(outputs, labels)
             loss.backward()
@@ -116,12 +110,12 @@ def train_model():
                 metrics = {
                     "cpu" : cpu_normalized,
                     "ram" : ram_process,
-                    "accuracy" : 100 * correct / total,
-                    "duration" : str(duration),
+                    "accuracy" : correct / total,
+                    "vitesse_exec" : total / (current_time - begin_time),
                     "time" : time.time()
                 }
                 value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
                 producer.produce(topic="metrics_pytorch",value=value,callback=delivery_report)
                 producer.flush() #force l'envoie de ce format de message dans le topic kafka
-                print(f"Epoch {epoch+1}, Batch {i+1}, Loss: {running_loss/(i+1):.4f}, Accuracy: {100 * correct / total:.2f}%")
+                print(f"Epoch {epoch+1}, Batch {i+1}, Loss: {running_loss/(i+1):.4f}, Accuracy: {correct/total:.4f}, vitesse_exec: {total / (current_time - begin_time):.2f} images/s")
                 last_time = current_time

@@ -129,11 +129,15 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                             detail="Utilisateur n'existe pas", 
                             headers={"WWW-Authenticate": "Bearer"})
+    if token_data is None or token_data.email is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                            detail="Token invalide ou inexistant ou expiré", 
+                            headers={"WWW-Authenticate": "Bearer"})
     return user
 
 def get_current_active_user(current_user: User = Depends(get_current_user)):
     if not current_user.is_active:
-        raise HTTPException(status_code=404, 
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail="Utilisateur inactif")
     return current_user
 

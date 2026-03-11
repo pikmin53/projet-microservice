@@ -9,6 +9,10 @@ COPY requirements.txt .
 # Install the requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Téléchargement du dataset au build
+COPY downloadcifar.py .
+RUN python downloadcifar.py
+
 # Copy the code
 COPY . .
 

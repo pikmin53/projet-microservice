@@ -2,6 +2,8 @@ import os
 # Suppress TensorFlow logging messages because we don't GPU on our machine #CYTech
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+# Configurer le répertoire Keras pour utiliser le volume
+os.environ["KERAS_HOME"] = "/app/data"
 
 from tensorflow.keras import layers
 import tensorflow as tf
@@ -32,7 +34,7 @@ CPU_CORES_LIMIT = 2  # Nombre de cœurs à utiliser (ajuste selon tes besoins)
 tf.config.threading.set_inter_op_parallelism_threads(CPU_CORES_LIMIT)
 tf.config.threading.set_intra_op_parallelism_threads(CPU_CORES_LIMIT)
 
-# Limitation au niveau OS (affinity sur les cœurs physiques)
+# Limitation au niveau OS (affinity sur les coeurs physiques)
 process = psutil.Process(os.getpid())
 available_cores = list(range(psutil.cpu_count()))
 limited_cores = available_cores[:CPU_CORES_LIMIT]
@@ -45,23 +47,23 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
         self.last_print_time = time.time()
         self.begin_time = self.last_print_time
         self.process = psutil.Process(os.getpid())
-    
+        self.samples_processed = 0
+        self.batch_size = self.params.get("batch_size") or self.params.get("steps", 1)
     def on_batch_end(self, batch, logs=None):
         current_time = time.time()
         
         
         if current_time - self.last_print_time >= 4: #retour métrics toutes les 4 secondes 
-            cpu_count = psutil.cpu_count()
+            self.samples_processed += self.batch_size
+            # CPU utilisée par le process Python (en %) sachnat qu'on limite à 2 coeurs le contenaire
             cpu_usage = self.process.cpu_percent()/CPU_CORES_LIMIT
             # RAM utilisée par le process Python (en MB)
             ram_usage = self.process.memory_info().rss / 1024**2
-            #calcul duration sous format datetime avec time.time et self.begin_time
-            duration = timedelta(seconds=time.time() - self.begin_time)
             metrics = {
                 "cpu" : cpu_usage,
                 "ram" : ram_usage,
                 "accuracy" : logs.get("accuracy", 0),
-                "duration" : str(duration),
+                "vitesse_exec" : self.samples_processed / (current_time - self.begin_time),
                 "time" : time.time()
             }
             value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
@@ -74,7 +76,6 @@ def train_model():
     # Configuration du modèle CNN pour la classification d'images du dataset CIFAR-100
     image_size = (32, 32, 3)
     nb_classes = 100
-
 
     (x_train, y_train), (x_test, y_test) = cifar100.load_data()
     assert x_train.shape == (50000, 32, 32, 3)
