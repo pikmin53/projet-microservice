@@ -62,7 +62,6 @@ export default function Dashboard() {
           }
           return newData
         })
-        console.log("Données reçues du serveur:", result.message)
       }
       catch (err) {
         setError({ message: 'Erreur de connexion: ' + err.message })
