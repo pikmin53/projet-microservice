@@ -20,6 +20,8 @@ services:
 
   service_auth:
     container_name: service_auth
+    ports:
+    - "${PORT_AUTH}:8000"
     build:
       context: ./service_authentification
       dockerfile: Dockerfile
@@ -37,6 +39,7 @@ services:
     restart: on-failure
     networks:
       - internal
+      - externe
 
           
   user_db:
