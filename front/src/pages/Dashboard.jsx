@@ -11,6 +11,7 @@ export default function Dashboard() {
     accuracy : [],
     duration : [],
   })
+  const [user, setUser] = useState(null)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
   const VITE_API_GATEWAY = import.meta.env.VITE_API_GATEWAY_URL ;
@@ -32,7 +33,6 @@ export default function Dashboard() {
           navigate('/login',{ state: { error: 'Session expirée, veuillez vous reconnecter.' } })
           return
         }
-
         const response = await fetch(`${VITE_API_GATEWAY}/models/data`, {
 
         method: 'GET',
@@ -43,6 +43,7 @@ export default function Dashboard() {
           throw new Error(`Erreur HTTP: ${response.status}`);
         }
         const result = await response.json()
+        setUser(result.user.user)
         const resultData = result.message || {}
         setError(null)
         setData(prevData => {
@@ -61,7 +62,7 @@ export default function Dashboard() {
           }
           return newData
         })
-        console.log("Données reçues du serveur:", result)
+        console.log("Données reçues du serveur:", result.message)
       }
       catch (err) {
         setError({ message: 'Erreur de connexion: ' + err.message })
@@ -78,14 +79,16 @@ export default function Dashboard() {
     <div>
       <h2>Dashboard</h2>
       {error?.message && <p style={{ color: 'red' }}>{error.message}</p>}
-      <MetricsChart
+      {user && user.status === 'admin' && <div>
+        <MetricsChart
         data={data.cpu}
         title="CPU metrics"
       />
       <MetricsChart
         data={data.ram}
         title="RAM metrics"
-      />
+      /></div>}
+      
       <MetricsChart
         data={data.accuracy}
         title="Accuracy metrics"
