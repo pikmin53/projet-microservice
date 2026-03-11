@@ -2,10 +2,12 @@ import { Link } from 'react-router-dom'
 import LogoutButton from './LogoutButton'
 import { useEffect } from 'react'
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 export default function Navbar() {
     const VITE_API_AUTH = import.meta.env.VITE_API_AUTH_URL;
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const location = useLocation();
 
     useEffect(() => {
         const verifyToken = async () => {
@@ -31,7 +33,7 @@ export default function Navbar() {
             }
         };
         verifyToken();
-    }, []);
+    }, [location]);
     
     return (
         <nav class="container">
