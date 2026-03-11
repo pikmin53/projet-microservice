@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from downloadcifar import cirfar
 import torchvision.transforms as transforms
 import time
 import psutil
 from log_service import log_event
 from confluent_kafka import Producer
+from torchvision.datasets import CIFAR100
 import os
 import json
 from datetime import timedelta, datetime
@@ -39,7 +39,13 @@ def train_model():
                             (0.5, 0.5, 0.5))
     ])
 
-    trainset = cirfar #chargment du dataset dl prédement quand il y avait de la connection
+    trainset = CIFAR100(
+    root='/app/data',
+    train=True,
+    download=False,
+    transform=transforms.ToTensor()
+)
+ #chargment du dataset dl prédement quand il y avait de la connection
 
     trainloader = torch.utils.data.DataLoader( #création d'un DataLoader pour itérer sur le dataset d'entraînement
         trainset,

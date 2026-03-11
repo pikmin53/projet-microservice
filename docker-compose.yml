@@ -121,6 +121,7 @@ services:
     restart: on-failure
     volumes:
       - ./services_training/pytorch_model:/app
+      - pytorch_data:/app/data 
     networks:
       - internal
         
@@ -196,6 +197,7 @@ networks:
 
 volumes:
   kafka_kafka:
+  pytorch_data:
 
 
 #- DATABASE_LOG_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_LOG}
