@@ -2,6 +2,8 @@ import os
 # Suppress TensorFlow logging messages because we don't GPU on our machine #CYTech
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+# Configurer le répertoire Keras pour utiliser le volume
+os.environ["KERAS_HOME"] = "/app/data"
 
 from tensorflow.keras import layers
 import tensorflow as tf
@@ -10,10 +12,11 @@ from tensorflow.keras.datasets import cifar100
 import time
 import psutil
 from confluent_kafka import Producer
+from log_service import log_event
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 
-
+## Configuration du producteur Kafka pour envoyer les métrics d'entraînement au topic "metrics_tensorflow"
 producer_config = {
 	"bootstrap.servers" : "kafka:9092"    
 }
@@ -25,6 +28,19 @@ def delivery_report(err,msg):
 	else :
 		print(f"Message envoyé : {msg.value().decode('utf-8')}")
 
+## Limitation des coeurs CPU
+CPU_CORES_LIMIT = 2  # Nombre de cœurs à utiliser (ajuste selon tes besoins)
+
+# Limitation au niveau TensorFlow (inter = entre opérations, intra = dans une opération)
+tf.config.threading.set_inter_op_parallelism_threads(CPU_CORES_LIMIT)
+tf.config.threading.set_intra_op_parallelism_threads(CPU_CORES_LIMIT)
+
+# Limitation au niveau OS (affinity sur les coeurs physiques)
+process = psutil.Process(os.getpid())
+available_cores = list(range(psutil.cpu_count()))
+limited_cores = available_cores[:CPU_CORES_LIMIT]
+process.cpu_affinity(limited_cores)
+
 
 class LiveMetricsCallback(tf.keras.callbacks.Callback):
     
@@ -32,37 +48,37 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
         self.last_print_time = time.time()
         self.begin_time = self.last_print_time
         self.process = psutil.Process(os.getpid())
-    
+        self.samples_processed = 0
+        self.batch_size = self.params.get("batch_size") or self.params.get("steps", 1)
     def on_batch_end(self, batch, logs=None):
         current_time = time.time()
         
-        # Print every 5 seconds
-        if current_time - self.last_print_time >= 5:
-            cpu_count = psutil.cpu_count()
-            cpu_usage = self.process.cpu_percent()/cpu_count
+        
+        if current_time - self.last_print_time >= 4: #retour métrics toutes les 4 secondes 
+            self.samples_processed += self.batch_size
+            # CPU utilisée par le process Python (en %) sachnat qu'on limite à 2 coeurs le contenaire
+            cpu_usage = self.process.cpu_percent()/CPU_CORES_LIMIT
             # RAM utilisée par le process Python (en MB)
             ram_usage = self.process.memory_info().rss / 1024**2
-            #calcul duration sous format datetime avec time.time et self.begin_time
-            duration = timedelta(seconds=time.time() - self.begin_time)
             metrics = {
                 "cpu" : cpu_usage,
                 "ram" : ram_usage,
                 "accuracy" : logs.get("accuracy", 0),
-                "duration" : str(duration),
-                "time" : time.time()
+                "vitesse_exec" : self.samples_processed / (current_time - self.begin_time),
+                "time" : datetime.utcnow().isoformat()
             }
             value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
+            log_event("tensorflow-service", "INFO", "Envoi de metrics")
             producer.produce(topic="metrics_tensorflow",value=value,callback=delivery_report)
             producer.flush() #force l'envoie de ce format de message dans le topic kafka
-        
             self.last_print_time = current_time
 
 
 def train_model():
+    log_event("pytorch-model", "INFO", "Debut d'entrainement")
     #download the dataset and split it into training and test sets
     image_size = (32, 32, 3)
     nb_classes = 100
-
 
     (x_train, y_train), (x_test, y_test) = cifar100.load_data()
     assert x_train.shape == (50000, 32, 32, 3)
@@ -70,11 +86,11 @@ def train_model():
     assert y_train.shape == (50000, 1)
     assert y_test.shape == (10000, 1)
 
-    # Normalize
+    # Normalisation
     x_train = x_train / 255.0
     x_test = x_test / 255.0
 
-    #data augmentation of cifar100 dataset because only 600 image per class and we have 100 classes, so we need to augment the data to increase the number of images per class and improve the performance of the model
+    #augmentation des images d'entraînement car 600 images par classe seulement
     data_augmentation = Sequential(
         [
             layers.Normalization(),
@@ -100,7 +116,7 @@ def train_model():
         
         layers.Flatten(),
         layers.Dense(128, activation='relu'),
-        layers.Dense(nb_classes)  # 100 classes in CIFAR-100 dataset
+        layers.Dense(nb_classes)  # 100 classes
     ])
 
 

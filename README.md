@@ -34,8 +34,13 @@ docker compose up
 
 L'application sera accessible sur :
 
-- Frontend : http://localhost:3000 (ou le port configuré)
-- API : http://localhost:8000 (ou le port configuré)
+- Frontend : http://localhost:3000 
+- API : http://localhost:8000 
+- Authentification : http://localhost:8001
+- Adminer : http://localhost:8080
+- Pytorch : http://localhost:8002
+- Tensorflow : http://localhost:8003
+- BDD : http://localhost:8004
 
 Pour arrêter les dockers :
 
@@ -60,9 +65,19 @@ docker compose down
 ### Service Log (service_log/)
 - **Description** : Enregistre les logs de l'application.
 
+### Service BDD 
+- **Description** : L'affiche sur postgres est légèrement buggé et limité puisqu'il n'affiche pas les bon montant mais on a vérifié qu'on stocké bien les données
+
 ### Services Training (services_training/)
 - **PyTorch Model** : Modèle de réseau de neurones convolutionnel (CNN).
 - **TensorFlow Model** : Modèle CNN avec Keras.
+
+### Utilisateurs par défault : 
+- userAdmin1 = UserCreate("Georgette", "Cy", "georgette.cy@coucou.com", "admin", "password")
+- userAdmin2 = UserCreate("Victor", "Tech", "victor.tech@coucou.com", "admin", "password")
+- user1 = UserCreate("Laura", "Carotte", "laura.carotte@coucou.com", "", "password")
+- user2 = UserCreate("George", "Cy", "george.cy@coucou.com", "", "password")
+- user3 = UserCreate("Prince", "Petit", "petit.prince@coucou.com", "", "password")
 
 ## Licence
 

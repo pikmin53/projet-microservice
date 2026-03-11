@@ -1,16 +1,17 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision.datasets import CIFAR100
+from downloadcifar import cirfar
 import torchvision.transforms as transforms
 import time
 import psutil
+from log_service import log_event
 from confluent_kafka import Producer
 import os
 import json
-from models.metrics import MetricsPytorchCreate, add_metrics
-from datetime import timedelta
+from datetime import timedelta, datetime
 
+## Configuration du producteur Kafka pour envoyer les métrics d'entraînement au topic "metrics_pytorch"
 producer_config = {
 	"bootstrap.servers" : "kafka:9092"
      
@@ -23,9 +24,14 @@ def delivery_report(err,msg):
 	else :
 		print(f"Message envoyé : {msg.value().decode('utf-8')}")
 
+## Limitation des coeurs CPU
+CPU_CORES_LIMIT = 2
+torch.set_num_threads(CPU_CORES_LIMIT)
+torch.set_num_interop_threads(CPU_CORES_LIMIT)
 
 
 def train_model():
+    log_event("pytorch-model", "INFO", "Debut d'entrainement")
     device = torch.device("cpu") #selection du device (CPU) car pas de gpu sur machine
     transform = transforms.Compose([ #transformation des données d'entrée pour les rendre compatibles avec le modèle
         transforms.ToTensor(),
@@ -33,12 +39,7 @@ def train_model():
                             (0.5, 0.5, 0.5))
     ])
 
-    trainset = CIFAR100( #téléchargement du dataset CIFAR-100 pour l'entraînement
-        root="./data",
-        train=True,
-        download=True,
-        transform=transform
-    )
+    trainset = cirfar #chargment du dataset dl prédement quand il y avait de la connection
 
     trainloader = torch.utils.data.DataLoader( #création d'un DataLoader pour itérer sur le dataset d'entraînement
         trainset,
@@ -74,7 +75,6 @@ def train_model():
 
     process = psutil.Process(os.getpid())#focus sur le processus actuel qui est celui du modèle pour ressortir les métric
     cpu_raw = process.cpu_percent()
-    cpu_count = psutil.cpu_count() #nb coeur processesseur
     last_time = time.time()
     begin_time = last_time
     epochs = 20 #nb d'itération sur l'ensemble du dataset d'entraînement
@@ -89,7 +89,7 @@ def train_model():
         for i, (inputs, labels) in enumerate(trainloader): #itération sur les batches d'entraînement, inputs sont les images et labels sont les classes correspondantes
             inputs, labels = inputs.to(device), labels.to(device)
             
-            optimizer.zero_grad()
+            optimizer.zero_grad() #pas de calcul de gradient 
             outputs = model(inputs)
             loss = criterion(outputs, labels)
             loss.backward()
@@ -102,22 +102,23 @@ def train_model():
             correct += (predicted == labels).sum().item()
             
             current_time = time.time()
-            if current_time - last_time >= 5:#retour des métrics souhaitez toutes les 5 secondes
+            if current_time - last_time >= 4:#retour des métrics souhaitez toutes les 4 secondes
                 
                 cpu_raw = process.cpu_percent()
-                cpu_normalized = cpu_raw / cpu_count #normalisation de l'utilisation du cpu en fonction du nombre de coeur du processeur
+                cpu_normalized = cpu_raw / CPU_CORES_LIMIT #normalisation de l'utilisation du cpu en fonction du nombre de coeur du processeur
                 
                 ram_process = process.memory_info().rss / 1024**2
                 duration= timedelta(seconds=current_time - begin_time)
                 metrics = {
                     "cpu" : cpu_normalized,
                     "ram" : ram_process,
-                    "accuracy" : 100 * correct / total,
-                    "duration" : str(duration),
-                    "time" : time.time()
+                    "accuracy" : correct / total,
+                    "vitesse_exec" : total / (current_time - begin_time),
+                    "time" : datetime.utcnow().isoformat()
                 }
                 value = json.dumps(metrics).encode("utf-8") #encodage des métrics en json pour les envoyer dans le topic kafka
+                log_event("pytorch-service", "INFO", "Envoi de metrics")
                 producer.produce(topic="metrics_pytorch",value=value,callback=delivery_report)
                 producer.flush() #force l'envoie de ce format de message dans le topic kafka
-                print(f"Epoch {epoch+1}, Batch {i+1}, Loss: {running_loss/(i+1):.4f}, Accuracy: {100 * correct / total:.2f}%")
+                print(f"Epoch {epoch+1}, Batch {i+1}, Loss: {running_loss/(i+1):.4f}, Accuracy: {correct/total:.4f}, vitesse_exec: {total / (current_time - begin_time):.2f} images/s")
                 last_time = current_time

@@ -129,11 +129,15 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                             detail="Utilisateur n'existe pas", 
                             headers={"WWW-Authenticate": "Bearer"})
+    if token_data is None or token_data.email is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                            detail="Token invalide ou inexistant ou expiré", 
+                            headers={"WWW-Authenticate": "Bearer"})
     return user
 
 def get_current_active_user(current_user: User = Depends(get_current_user)):
     if not current_user.is_active:
-        raise HTTPException(status_code=404, 
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail="Utilisateur inactif")
     return current_user
 
@@ -160,8 +164,10 @@ async def root():
 @app.post("/registerUser", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == user.email).first():
+        log_event("autentification-service", "WARNING", "Utilisateur deja cree")
         raise HTTPException(status_code=400,
                             detail="Email déjà utilisé")
+        
     hashed_password = get_password_hash(user.password)
     new_user = User(
         name=user.name,
@@ -170,9 +176,12 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         statut="user", #user ou admin
         hashed_password=hashed_password
     )
+    if user.statut == "admin" :
+        new_user.statut = "admin"
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    log_event("autentification-service", "INFO", f"Nouvel utilisateur ajoute (id : {new_user.id})")
     return new_user
 
 #connexion
@@ -192,7 +201,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    log_event("autentification-service", "INFO", "connexion reussie")
+    log_event("autentification-service", "INFO", f"connexion reussie (user id : {user.id})")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -204,6 +213,7 @@ def get_profil(current_user: User = Depends(get_current_active_user)):
 # Vérifier la validité du token et retourner les informations de l'utilisateur
 @app.get("/verifyToken")
 def verify_token_endpoint(current_user:User = Depends(get_current_active_user)):
+    log_event("autentification-service", "INFO", "Verification du token de connection")
     return {
         "valid" : True,
         "user" : {
@@ -229,24 +239,6 @@ def get_user(user_id: int,current_user:User = Depends(get_current_active_user), 
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     return user
 
-# créer un user, depuis un compte d'un autre user connecté
-@app.post("/users/", response_model=UserResponse)
-def create_user(user: UserCreate, current_user:User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    if db.query(User).filter(User.email == user.email).first():
-        raise HTTPException(status_code=400, detail="Email déjà utilisé")
-    
-    hashed_password = get_password_hash(user.password)
-    new_user = User(
-        name=user.name,
-        firstName=user.firstName,
-        email=user.email,
-        statut="user",
-        hashed_password=hashed_password
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
 
 
 # mettre à jour un user, depuis un compte d'un autre user connecté
@@ -281,4 +273,19 @@ def delete_user(user_id: int, current_user:User = Depends(get_current_active_use
     db.commit()
     return {"message": "Utilisateur supprimé avec succès"}
 
+
+
+userAdmin1 = UserCreate(firstName="Georgette", name="Cy",  email="georgette.cy@coucou.com", statut="admin", password="password")
+userAdmin2 = UserCreate(firstName="Victor", name="Tech",  email="victor.tech@coucou.com", statut="admin", password="password")
+user1 = UserCreate(firstName="Laura", name="Carotte",  email="laura.carotte@coucou.com", statut="user", password="password")
+user2 = UserCreate(firstName="George", name="Cy",  email="george.cy@coucou.com", statut="user", password="password")
+user3 = UserCreate(firstName="Prince", name="Petit",  email="petit.prince@coucou.com", statut="user", password="password")
+
+db = SessionLocal()
+for user in [userAdmin1, userAdmin2, user1, user2, user3]:
+    try:
+        register_user(user, db)
+    except HTTPException:
+        pass  # user existe déjà, on ignore
+db.close()
 

@@ -11,13 +11,15 @@ import { Routes, Route } from 'react-router-dom'
 function App() {
   return (
     <>
+      <Navbar />
+      <Header />
       <main class="container">
         <Routes>
-          <Route path="/" element={<><Navbar /><Header /><Home /></>} />
-          <Route path="/login" element={<><Navbar /><Header /><Login /></>} />
-          <Route path="/register" element={<><Navbar /><Header /><Register /></>} />
-          <Route path="/dashboard" element={<><Navbar /><Header /><Dashboard /></>} />
-          <Route path="/contacts" element={<><Navbar /><Header /><Contacts /></>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/contacts" element={<Contacts />} />
         </Routes>
       </main>
       < Footer />
