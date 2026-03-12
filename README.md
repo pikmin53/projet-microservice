@@ -34,13 +34,10 @@ docker compose up
 
 L'application sera accessible sur :
 
-- Frontend : http://localhost:3000 
+- Frontend : http://localhost:5173 
 - API : http://localhost:8000 
 - Authentification : http://localhost:8001
 - Adminer : http://localhost:8080
-- Pytorch : http://localhost:8002
-- Tensorflow : http://localhost:8003
-- BDD : http://localhost:8004
 
 Pour arrêter les dockers :
 
@@ -56,30 +53,55 @@ docker compose down
 - **Endpoints** : Consultez la documentation automatique sur http://localhost:8000/docs une fois lancé.
 
 ### Frontend (front/)
-- **Port** : 3000
+- **Port** : 5173
 - **Description** : Application React avec Vite pour le front.
 
 ### Service Authentification (service_authentification/)
 - **Description** : Gère l'authentification et l'autorisation pour les utilisateurs.
+- **Endpoints** : Consultez la documentation automatique sur http://localhost:8001/docs une fois lancé.
 
 ### Service Log (service_log/)
 - **Description** : Enregistre les logs de l'application.
 
-### Service BDD 
-- **Description** : L'affiche sur postgres est légèrement buggé et limité puisqu'il n'affiche pas les bon montant mais on a vérifié qu'on stocké bien les données
+### Service d'affichage BDD (adminer)
+- **Description** : Permet de vérifier que les informations se stock bien en BDD. L'affichage du nombre de ligne semble parfois incorrecte mais la base de données l'est.
+- **Accés** : Par le lien http://localhost:8080 en choisissant postgre et utilisant les identifiants :
+#### BDD user
+POSTGRES_USER_USER=user
+POSTGRES_USER_PASSWORD=password
+POSTGRES_USER_DB=user_db
+#### BDD API
+POSTGRES_API_USER=user
+POSTGRES_API_PASSWORD=password
+POSTGRES_API_DB=api_db
 
 ### Services Training (services_training/)
 - **PyTorch Model** : Modèle de réseau de neurones convolutionnel (CNN).
 - **TensorFlow Model** : Modèle CNN avec Keras.
 
 ### Utilisateurs par défault : 
+#### UserAdmin1
+email : georgette.cy@coucou.com
+password : password
+
+#### UserAdmin2
+email : victor.tech@coucou.com
+password : password
+
+#### User1
+email : laura.carotte@coucou.com
+password : password
+
+#### User2
+email : george.cy@coucou.com
+password : password
+
+#### User3
+email : petit.prince@coucou.com
+password : password
+
 - userAdmin1 = UserCreate("Georgette", "Cy", "georgette.cy@coucou.com", "admin", "password")
 - userAdmin2 = UserCreate("Victor", "Tech", "victor.tech@coucou.com", "admin", "password")
 - user1 = UserCreate("Laura", "Carotte", "laura.carotte@coucou.com", "", "password")
 - user2 = UserCreate("George", "Cy", "george.cy@coucou.com", "", "password")
 - user3 = UserCreate("Prince", "Petit", "petit.prince@coucou.com", "", "password")
-
-## Licence
-
-Ce projet est sous licence MIT.
-
