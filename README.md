@@ -29,7 +29,7 @@ Ce projet est une architecture de microservices composée de plusieurs services 
 Pour démarrer le projet, la commande suivante a executé dans le dossier projet-microserice :
 
 ```
-docker compose up
+docker compose up --build
 ```
 
 L'application sera accessible sur :
