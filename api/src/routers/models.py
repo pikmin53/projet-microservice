@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Request
 from src.core.security import verify_token
 from src.core.metrics import create_consumer, consume_metrics
+from datetime import datetime
+
 
 router = APIRouter()
 
@@ -19,7 +21,7 @@ async def get_data(request : Request):
             return {"message": {}, "user": value}
         metrics = {
             key: 
-                {"time": metrics_pytorch["time"], "pytorch": metrics_pytorch[key], "tensorflow": metrics_tensorflow[key]}
+                {"time": datetime.fromisoformat(metrics_pytorch["time"]).strftime("%H:%M:%S"), "pytorch": metrics_pytorch.get(key), "tensorflow": metrics_tensorflow.get(key)}
             for key in metrics_pytorch if key != "time"
         }
         if metrics is not None:

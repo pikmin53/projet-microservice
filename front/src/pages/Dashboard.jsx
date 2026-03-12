@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MetricsChart from '../components/MetricsChart'
 
-const METRIC_NAMES = ['cpu', 'ram', 'accuracy', 'duration']
+const METRIC_NAMES = ['cpu', 'ram', 'accuracy', 'vitesse_exec']
 
 export default function Dashboard() {
   const [data, setData] = useState({
     cpu: [],
     ram : [],
     accuracy : [],
-    duration : [],
+    vitesse_exec : [],
   })
   const [user, setUser] = useState(null)
   const [error, setError] = useState(null)
@@ -45,6 +45,7 @@ export default function Dashboard() {
         const result = await response.json()
         setUser(result.user.user)
         const resultData = result.message || {}
+        console.log('Données reçues du backend:', resultData)
         setError(null)
         setData(prevData => {
           const newData = { ...prevData }
@@ -78,20 +79,34 @@ export default function Dashboard() {
     <div>
       <h2>Dashboard</h2>
       {error?.message && <p style={{ color: 'red' }}>{error.message}</p>}
-      {user && user.status === 'admin' && <div>
+      <article>
+        <h2>Métriques utilisateur</h2>
         <MetricsChart
-        data={data.cpu}
-        title="CPU metrics"
-      />
-      <MetricsChart
-        data={data.ram}
-        title="RAM metrics"
-      /></div>}
-      
-      <MetricsChart
-        data={data.accuracy}
-        title="Accuracy metrics"
-      />
+          data={data.accuracy}
+          title="Accuracy"
+          unit=""
+        />
+        <MetricsChart
+          data={data.vitesse_exec}
+          title="Vitesse d'exécution"
+          unit="img/s"
+        />
+      </article>
+      {user && user.statut === 'admin' && <div>
+        <article>
+          <h2>Métriques admin</h2>
+          <MetricsChart
+          data={data.cpu}
+          title="CPU"
+          unit="%"
+        />
+          <MetricsChart
+            data={data.ram}
+            title="RAM"
+            unit=""
+          />
+        </article>
+      </div>}
     </div>
   )
 }
