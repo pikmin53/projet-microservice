@@ -79,6 +79,9 @@ POSTGRES_API_DB=api_db
 - **PyTorch Model** : Modèle de réseau de neurones convolutionnel (CNN).
 - **TensorFlow Model** : Modèle CNN avec Keras.
 
+### Schéma de l'architecture
+![architecture](archi.png)
+
 ### Utilisateurs par défault : 
 #### UserAdmin1
 email : georgette.cy@coucou.com
