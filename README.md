@@ -80,7 +80,7 @@ docker compose down
 - **TensorFlow Model** : Modèle CNN avec Keras.
 
 ## Schéma de l'architecture
-![architecture](archi.png)
+![architecture](architecture_app.png)
 
 ## Utilisateurs par défault : 
 ### UserAdmin1
