@@ -1,6 +1,7 @@
 import requests
 import os
 
+# Appel au service d'autentification pour empêcher un utilisateur non authentifié d'utiliser /data
 AUTH_URL = os.getenv("API_AUTH_URL")
 def verify_token(request):
     try:

@@ -9,6 +9,7 @@ router = APIRouter()
 consumer_pytorch = create_consumer("metrics_pytorch")
 consumer_tensorflow = create_consumer("metrics_tensorflow")
 
+# Récupération des métriques Kafka aprés vérification
 @router.get("/data")
 async def get_data(request : Request):
     value = verify_token(request)

@@ -1,6 +1,7 @@
 from confluent_kafka import Consumer
 import json
 
+#configuration du consomateur kafka pour les métriques
 consumer_config = {
 	"bootstrap.servers": "kafka:9092",
 	"group.id": "metrics-tracker",
