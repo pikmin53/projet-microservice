@@ -67,44 +67,38 @@ docker compose down
 - **Description** : Permet de vérifier que les informations se stock bien en BDD. L'affichage du nombre de ligne semble parfois incorrecte mais la base de données l'est.
 - **Accés** : Par le lien http://localhost:8080 en choisissant postgre et utilisant les identifiants :
 #### BDD user
-POSTGRES_USER_USER=user
-POSTGRES_USER_PASSWORD=password
-POSTGRES_USER_DB=user_db
+- POSTGRES_USER_USER=user
+- POSTGRES_USER_PASSWORD=password
+- POSTGRES_USER_DB=user_db
 #### BDD API
-POSTGRES_API_USER=user
-POSTGRES_API_PASSWORD=password
-POSTGRES_API_DB=api_db
+- POSTGRES_API_USER=user
+- POSTGRES_API_PASSWORD=password
+- POSTGRES_API_DB=api_db
 
 ### Services Training (services_training/)
 - **PyTorch Model** : Modèle de réseau de neurones convolutionnel (CNN).
 - **TensorFlow Model** : Modèle CNN avec Keras.
 
-### Schéma de l'architecture
+## Schéma de l'architecture
 ![architecture](archi.png)
 
-### Utilisateurs par défault : 
-#### UserAdmin1
-email : georgette.cy@coucou.com
-password : password
+## Utilisateurs par défault : 
+### UserAdmin1
+- email : georgette.cy@coucou.com
+- password : password
 
-#### UserAdmin2
-email : victor.tech@coucou.com
-password : password
+### UserAdmin2
+- email : victor.tech@coucou.com
+- password : password
 
-#### User1
-email : laura.carotte@coucou.com
-password : password
+### User1
+- email : laura.carotte@coucou.com
+- password : password
 
-#### User2
-email : george.cy@coucou.com
-password : password
+### User2
+- email : george.cy@coucou.com
+- password : password
 
-#### User3
-email : petit.prince@coucou.com
-password : password
-
-- userAdmin1 = UserCreate("Georgette", "Cy", "georgette.cy@coucou.com", "admin", "password")
-- userAdmin2 = UserCreate("Victor", "Tech", "victor.tech@coucou.com", "admin", "password")
-- user1 = UserCreate("Laura", "Carotte", "laura.carotte@coucou.com", "", "password")
-- user2 = UserCreate("George", "Cy", "george.cy@coucou.com", "", "password")
-- user3 = UserCreate("Prince", "Petit", "petit.prince@coucou.com", "", "password")
+### User3
+- email : petit.prince@coucou.com
+- password : password
