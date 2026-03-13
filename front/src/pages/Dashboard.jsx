@@ -103,7 +103,7 @@ export default function Dashboard() {
           <MetricsChart
             data={data.ram}
             title="RAM"
-            unit=""
+            unit="mb"
           />
         </article>
       </div>}
