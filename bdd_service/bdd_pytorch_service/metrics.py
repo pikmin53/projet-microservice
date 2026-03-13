@@ -18,14 +18,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
+# classe correspondant à la table
 class MetricsPytorch(Base):
     __tablename__ = "metricsPytorch"
 
@@ -36,11 +29,12 @@ class MetricsPytorch(Base):
     vitesse_exec = Column(Float, nullable=False)
     time = Column(DateTime, nullable=False)
 
+# ajout de la table 
+def init_db() :
+    Base.metadata.create_all(bind=engine)
 
-Base.metadata.create_all(bind=engine)
 
-
-
+#ajout des metrics
 def add_metrics(metrics: json):
     db: Session = SessionLocal()
     new_metrics = MetricsPytorch(
@@ -53,11 +47,12 @@ def add_metrics(metrics: json):
     db.commit()
     db.refresh(new_metrics)
     total = db.query(MetricsPytorch).count()
+    db.close()
     print(f"Total lignes metricsPytorch : {total}")
     log_event("BDD-service", "INFO", "metrics Pytorch ajoutees")
     return new_metrics
 
-
+# consummer kafka qui récupère les données pour les mettre en bdd
 def run_consumer():
     consumer_config = {
         "bootstrap.servers": "kafka:9092",
@@ -84,7 +79,8 @@ def run_consumer():
 
 
 # Démarrer le consumer dans un thread séparé
-consumer_thread = threading.Thread(target=run_consumer, daemon=True)
-consumer_thread.start()
+def start_consumer() :
+    consumer_thread = threading.Thread(target=run_consumer, daemon=True)
+    consumer_thread.start()
 
     
