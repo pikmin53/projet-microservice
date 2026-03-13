@@ -20,7 +20,7 @@ def sartup():
     mp.start_consumer()
     mt.start_consumer()
 
-    log_service.log_event("BDD-service", "INFO", "Tables ajoutees et connexion avec kafka réussie")
+    log_service.log_event("BDD-service", "INFO", "Tables log, metrics Tensorflow et Pytorch ajoutees à la BDD de l'API et connexion avec kafka reussie")
 
 
 @app.get("/")
