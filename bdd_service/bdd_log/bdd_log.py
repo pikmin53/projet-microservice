@@ -18,14 +18,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
+# classe log pour créer la bdd
 class Logs(Base):
     __tablename__ = "logs"
 
@@ -35,8 +28,9 @@ class Logs(Base):
     message = Column(Text, nullable=False)
     time = Column(DateTime, nullable=False)
 
-
-Base.metadata.create_all(bind=engine)
+# ajout de la table
+def init_db() :
+    Base.metadata.create_all(bind=engine)
 
 
 
@@ -53,10 +47,11 @@ def add_log(log : json):
     db.add(new_log)
     db.commit()
     db.refresh(new_log)
+    db.close()
     return new_log
 
 
-
+# consummer kafka qui récupère les données pour les mettre en bdd
 def run_consumer():
     consumer_config = {
         "bootstrap.servers": "kafka:9092",
@@ -82,8 +77,9 @@ def run_consumer():
 
 
 # Démarrer le consumer dans un thread séparé
-consumer_thread = threading.Thread(target=run_consumer, daemon=True)
-consumer_thread.start()
+def start_consumer() : 
+    consumer_thread = threading.Thread(target=run_consumer, daemon=True)
+    consumer_thread.start()
 
     
 

@@ -31,7 +31,7 @@ torch.set_num_interop_threads(CPU_CORES_LIMIT)
 
 
 def train_model():
-    log_event("pytorch-model", "INFO", "Debut d'entrainement")
+    log_event("pytorch-service", "INFO", "Debut d'entrainement")
     device = torch.device("cpu") #selection du device (CPU) car pas de gpu sur machine
     transform = transforms.Compose([ #transformation des données d'entrée pour les rendre compatibles avec le modèle
         transforms.ToTensor(),
