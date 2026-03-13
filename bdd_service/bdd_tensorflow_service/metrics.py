@@ -23,14 +23,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
+# classe correspondant à une table de la bdd
 class MetricsTensorflow(Base):
     __tablename__ = "metricsTensorflow"
 
@@ -41,10 +34,11 @@ class MetricsTensorflow(Base):
     vitesse_exec = Column(Float, nullable=False)
     time = Column(DateTime, nullable=False)
 
+# ajout de la table en bdd
+def init_db() :
+    Base.metadata.create_all(bind=engine)
 
-Base.metadata.create_all(bind=engine)
-
-
+# ajout des metrcis
 def add_metrics(metrics: json):
     db: Session = SessionLocal()
 
@@ -60,10 +54,11 @@ def add_metrics(metrics: json):
     db.refresh(new_metrics)
     log_event("BDD-service", "INFO", "metrics Tensorflow ajoutees")
     total = db.query(MetricsTensorflow).count()
+    db.close()
     print(f"Total lignes metricsTensorflow : {total}")
     return new_metrics
 
-
+# consummer kafka qui récupère les données pour les mettre en bdd
 def run_consumer():
     consumer_config = {
         "bootstrap.servers": "kafka:9092",
@@ -93,8 +88,9 @@ def run_consumer():
 
 
 # Démarrer le consumer dans un thread séparé
-consumer_thread = threading.Thread(target=run_consumer, daemon=True)
-consumer_thread.start()
+def start_consumer() :
+    consumer_thread = threading.Thread(target=run_consumer, daemon=True)
+    consumer_thread.start()
 
     
 

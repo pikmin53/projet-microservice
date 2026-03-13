@@ -64,7 +64,7 @@ docker compose down
 - **Description** : Enregistre les logs de l'application.
 
 ### Service d'affichage BDD (adminer)
-- **Description** : Permet de vérifier que les informations se stock bien en BDD. L'affichage du nombre de ligne semble parfois incorrecte mais la base de données l'est.
+- **Description** : Permet de vérifier que les informations se stock bien en BDD.
 - **Accés** : Par le lien http://localhost:8080 en choisissant postgre et utilisant les identifiants :
 #### BDD user
 - POSTGRES_USER_USER=user

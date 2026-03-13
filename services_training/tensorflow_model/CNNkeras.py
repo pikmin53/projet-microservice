@@ -75,7 +75,7 @@ class LiveMetricsCallback(tf.keras.callbacks.Callback):
 
 
 def train_model():
-    log_event("pytorch-model", "INFO", "Debut d'entrainement")
+    log_event("tensorflow-service", "INFO", "Debut d'entrainement")
     #download the dataset and split it into training and test sets
     image_size = (32, 32, 3)
     nb_classes = 100

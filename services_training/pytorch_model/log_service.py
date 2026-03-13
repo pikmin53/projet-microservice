@@ -11,7 +11,7 @@ def delivery_report(err,msg):
     else :
         print(f"Message envoyé : {msg.value().decode('utf-8')}")
                                                      
-
+# fonction de création d'un log
 def log_event(service: str, level: str, message: str):
     log_data={
         "service" : service,
