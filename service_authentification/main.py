@@ -46,6 +46,7 @@ class User(Base):
 
 
 Base.metadata.create_all(engine)
+log_event("autentification-service", "INFO", "Table User creee dans la BDD pour les utilisateurs")
 
 # API MODELS
 class UserCreate(BaseModel):
