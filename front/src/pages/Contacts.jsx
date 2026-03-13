@@ -38,24 +38,24 @@ export default function Contacts() {
 
                     <h5>Article 4 – Propriété intellectuelle</h5>
 
-                    <p>Le contenu du site (textes, images, logos, etc.) est protégé par les lois en vigueur relatives à la propriété intellectuelle et aux droits d'auteur. Toute reproduction, représentation, modification, ou adaptation, totale ou partielle du contenu, sans l'autorisation écrite préalable de [Nom de l'entreprise], est interdite et constitue une contrefaçon.</p>
+                    <p>Le contenu du site (textes, images, logos, etc.) est protégé par les lois en vigueur relatives à la propriété intellectuelle et aux droits d'auteur. Toute reproduction, représentation, modification, ou adaptation, totale ou partielle du contenu, sans l'autorisation écrite préalable de AlmostGirlz, est interdite et constitue une contrefaçon.</p>
                     
                     <h5>Article 5 – Données personnelles</h5>
 
-                    <p>Le site peut recueillir des données personnelles telles que le nom, l'adresse e-mail, etc. Conformément à la réglementation en vigueur (RGPD), l'utilisateur dispose d'un droit d'accès, de rectification et de suppression de ses données personnelles. Pour toute demande, contactez [email du DPO].</p>
+                    <p>Le site peut recueillir des données personnelles telles que le nom, l'adresse e-mail, etc. Conformément à la réglementation en vigueur (RGPD), l'utilisateur dispose d'un droit d'accès, de rectification et de suppression de ses données personnelles. Pour toute demande, contactez <a href="mahault.lebrin-ventaja@etu.cyu.fr">mahault.lebrin-ventaja@etu.cyu.fr</a>.</p>
 
                     <h5>Article 6 – Responsabilité</h5>
 
-                    <p>L'utilisation du Site se fait sous la seule responsabilité de l'utilisateur. [Nom de l'entreprise] ne saurait être tenu responsable de tout dommage direct ou indirect, y compris pertes de données ou de profit, résultant de l'accès ou de l'utilisation du Site.</p>
+                    <p>L'utilisation du Site se fait sous la seule responsabilité de l'utilisateur. AlmostGirlz ne saurait être tenu responsable de tout dommage direct ou indirect, y compris pertes de données ou de profit, résultant de l'accès ou de l'utilisation du Site.</p>
 
                     <h5>Article 7 – Liens hypertextes</h5>
 
-                    <p>Le site peut contenir des liens vers d'autres sites internet. [Nom de l'entreprise] n'exerce aucun contrôle sur le contenu de ces sites et ne saurait être tenu responsable de leur disponibilité ou de leur contenu.</p>
+                    <p>Le site peut contenir des liens vers d'autres sites internet. AlmostGirlz n'exerce aucun contrôle sur le contenu de ces sites et ne saurait être tenu responsable de leur disponibilité ou de leur contenu.</p>
                     
 
                     <h5>Article 8 – Modification des CGU</h5>
 
-                    <p>[Nom de l'entreprise] se réserve le droit de modifier à tout moment les présentes CGU. Les utilisateurs sont invités à les consulter régulièrement. Les modifications prennent effet à compter de leur publication sur le Site.</p>
+                    <p>AlmostGirlz se réserve le droit de modifier à tout moment les présentes CGU. Les utilisateurs sont invités à les consulter régulièrement. Les modifications prennent effet à compter de leur publication sur le Site.</p>
 
                     
 
