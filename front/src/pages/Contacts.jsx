@@ -19,12 +19,12 @@ export default function Contacts() {
                 <div>   
                     <h5>Préambule</h5>
 
-                    <p>Les présentes Conditions Générales d'Utilisation (ci-après "CGU") régissent l'accès et l'utilisation du site [Nom du site], édité par [Nom de l'entreprise], dont le siège social est situé [Adresse de l'entreprise]. L'utilisateur reconnaît avoir pris connaissance des CGU et s'engage à les respecter.
+                    <p>Les présentes Conditions Générales d'Utilisation (ci-après "CGU") régissent l'accès et l'utilisation du site Projet Micro-Services, édité par AlmostGirlz, dont le siège social est situé CY tech Pau. L'utilisateur reconnaît avoir pris connaissance des CGU et s'engage à les respecter.
 </p>
                     
                     <h5>Article 1 – Définitions</h5>
                     
-                    <p>Site : désigne le site internet accessible à l'adresse [URL du site].
+                    <p>Site : désigne le site internet accessible à l'adresse projet-microservice.com.
                     Utilisateur : toute personne accédant et naviguant sur le Site, à quelque titre que ce soit.
                     Contenu : désigne l'ensemble des éléments présents sur le Site (textes, images, vidéos, logos, etc.).</p>
                     
@@ -61,13 +61,13 @@ export default function Contacts() {
 
                     <h5>Article 9 – Loi applicable</h5>
 
-                    <p>Les présentes CGU sont régies par la loi française. En cas de litige, et après tentative de résolution amiable, les tribunaux de [Ville] seront compétents.</p>
+                    <p>Les présentes CGU sont régies par la loi française. En cas de litige, et après tentative de résolution amiable, les tribunaux de Pau seront compétents.</p>
 
                     
 
                     <h5>Article 10 – Contact</h5>
 
-                    <p>Pour toute question relative aux présentes CGU, vous pouvez contacter [Nom de l'entreprise] à l'adresse suivante : [Adresse e-mail].</p>
+                    <p>Pour toute question relative aux présentes CGU, vous pouvez contacter AlmostGirlz à l'adresse suivante : <a href="mahault.lebrin-ventaja@etu.cyu.fr">mahault.lebrin-ventaja@etu.cyu.fr</a></p>
                 </div>
 
             </article>

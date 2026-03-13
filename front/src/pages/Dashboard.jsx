@@ -45,7 +45,6 @@ export default function Dashboard() {
         const result = await response.json()
         setUser(result.user.user)
         const resultData = result.message || {}
-        console.log('Données reçues du backend:', resultData)
         setError(null)
         setData(prevData => {
           const newData = { ...prevData }
